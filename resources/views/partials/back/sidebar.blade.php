@@ -9,6 +9,7 @@
     ['title' => 'Dons', 'icon' => 'bx-donate-heart'],
 
     ['section' => 'Partenaires'],
+    ['title' => 'Ateliers', 'icon' => 'bx-store-alt', 'route' => 'admin.ateliers.index'],
     ['title' => 'Associations', 'icon' => 'bx-group'],
     ['title' => 'Collecte', 'icon' => 'bx-map'],
 
@@ -46,7 +47,7 @@
           <div class="title-wrapper"><span class="title-text">{{ $item['section'] }}</span></div>
         </li>
       @else
-        @php($isActive = isset($item['route']) && request()->routeIs($item['route']))
+        @php($isActive = isset($item['route']) && (request()->routeIs($item['route']) || (str_contains($item['route'], 'ateliers') && request()->routeIs('admin.ateliers.*'))))
         <li class="nav-link">
           <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" @class(['router-link-active router-link-exact-active' => $isActive]) @if ($isActive) aria-current="page" @endif>
             <i class="{{ $item['icon'] }} v-icon notranslate v-theme--light v-icon--size-default nav-item-icon" aria-hidden="true"></i>
