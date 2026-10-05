@@ -30,8 +30,8 @@
     <li class="nav-section-title">
       <div class="title-wrapper"><span class="title-text">Administration</span></div>
     </li>
-    @include('partials.back.nav-link', ['title' => 'Utilisateurs', 'icon' => 'bx-user', 'badge' => 'Bientôt'])
-    @include('partials.back.nav-link', ['title' => 'Statistiques', 'icon' => 'bx-bar-chart-alt-2', 'badge' => 'Bientôt'])
+    @include('partials.back.nav-link', ['title' => 'Utilisateurs', 'icon' => 'bx-user', 'href' => route('admin.users.index'), 'active' => request()->routeIs('admin.users.*')])
+    @include('partials.back.nav-link', ['title' => 'Statistiques', 'icon' => 'bx-bar-chart-alt-2', 'href' => route('admin.statistiques'), 'active' => request()->routeIs('admin.statistiques')])
 
     <li class="nav-section-title">
       <div class="title-wrapper"><span class="title-text">Raccourcis</span></div>
