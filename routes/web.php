@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/administration.php';
 
 // Modules (one file per module, edited only by its team)
 require __DIR__.'/modules/depot.php';
