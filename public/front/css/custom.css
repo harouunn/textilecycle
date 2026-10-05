@@ -1,0 +1,44 @@
+/* TexTileCycle — small additions on top of the Kaira template */
+
+.tc-brand {
+  font-family: "Marcellus", serif;
+  font-size: 1.9rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #111;
+  text-decoration: none;
+}
+
+.tc-brand span {
+  color: #3d7a4f;
+}
+
+.tc-brand:hover {
+  color: #111;
+}
+
+/* Logout button inside dropdowns looks like a link */
+.dropdown-menu form .dropdown-item {
+  border: 0;
+  background: none;
+  text-transform: uppercase;
+}
+
+/* Auth pages */
+.tc-auth-card {
+  max-width: 480px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.tc-auth-card .form-control {
+  border-radius: 0;
+}
+
+.tc-auth-card .form-label {
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
