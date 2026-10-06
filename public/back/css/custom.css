@@ -67,3 +67,106 @@ button.v-avatar {
     position: static !important;
   }
 }
+
+/* Form fields styling */
+.v-field__input {
+  width: 100%;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.9375rem;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 0.375rem;
+  background-color: rgb(var(--v-theme-surface));
+  transition: border-color 0.2s;
+}
+
+.v-field__input:focus {
+  outline: none;
+  border-color: rgb(var(--v-theme-primary));
+  box-shadow: 0 0 0 0.2rem rgba(var(--v-theme-primary), 0.15);
+}
+
+.v-field__input.error {
+  border-color: rgb(var(--v-theme-error));
+}
+
+.v-field__input:disabled {
+  background-color: rgba(var(--v-theme-on-surface), 0.04);
+  cursor: not-allowed;
+}
+
+textarea.v-field__input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Form labels */
+.v-label.v-field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), 0.87);
+}
+
+/* Error messages */
+.v-messages.text-error {
+  font-size: 0.75rem;
+}
+
+/* Table improvements */
+.v-table table {
+  width: 100%;
+}
+
+.v-table thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  padding: 0.75rem 1rem;
+}
+
+.v-table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.v-table tbody tr {
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.v-table tbody tr:hover {
+  background-color: rgba(var(--v-theme-on-surface), 0.02);
+}
+
+/* Breadcrumbs */
+.v-breadcrumbs {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.v-breadcrumbs-item {
+  font-size: 0.875rem;
+}
+
+.v-breadcrumbs-item--link {
+  text-decoration: none;
+  color: rgb(var(--v-theme-primary));
+}
+
+.v-breadcrumbs-item--link:hover {
+  text-decoration: underline;
+}
+
+.v-breadcrumbs-item--disabled .v-breadcrumbs-item--link {
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  pointer-events: none;
+}
+
+.v-breadcrumbs-divider {
+  color: rgba(var(--v-theme-on-surface), 0.38);
+}

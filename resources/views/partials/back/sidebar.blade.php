@@ -1,3 +1,4 @@
+
 <aside data-v-0433a762 class="layout-vertical-nav" data-nav>
   <div data-v-0433a762 class="nav-header">
     <a data-v-fba8a720 href="{{ route('admin.dashboard') }}" class="app-logo app-title-wrapper">
@@ -16,6 +17,7 @@
   <div data-v-0433a762 class="vertical-nav-items-shadow"></div>
 
   <ul data-v-0433a762 class="nav-items" data-nav-items>
+
     @include('partials.back.nav-link', ['title' => 'Tableau de bord', 'icon' => 'bx-home-smile', 'href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard')])
 
     <li class="nav-section-title">
