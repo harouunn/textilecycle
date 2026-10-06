@@ -16,6 +16,14 @@ class AtelierRequest extends FormRequest
     }
 
     /**
+     * Une case décochée n'est pas envoyée par le navigateur : on la convertit en « false ».
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge(['actif' => $this->boolean('actif')]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>

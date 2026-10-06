@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Ateliers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\AtelierRequest;
 use App\Models\Atelier;
-use Illuminate\Http\Request;
 
 class AtelierController extends Controller
 {
@@ -14,6 +14,7 @@ class AtelierController extends Controller
     public function index()
     {
         $ateliers = Atelier::latest()->paginate(15);
+
         return view('admin.ateliers.index', compact('ateliers'));
     }
 
