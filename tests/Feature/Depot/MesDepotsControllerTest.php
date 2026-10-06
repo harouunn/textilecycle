@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Depot;
 
+use App\Enums\Depot\Moderation;
 use App\Enums\Depot\StatutVetement;
 use App\Models\Categorie;
 use App\Models\User;
@@ -35,10 +36,11 @@ class MesDepotsControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('depot.mes-depots.index'));
-        $response->assertSessionHas('success', 'Merci ! Votre vêtement « Jean droit » a bien été déposé.');
+        $response->assertSessionHas('success', 'Merci ! Votre vêtement « Jean droit » a bien été déposé. Il apparaîtra dans le catalogue après validation.');
         $vetement = Vetement::query()->sole();
         $this->assertSame($user->id, $vetement->user_id);
         $this->assertSame(StatutVetement::Disponible, $vetement->statut);
+        $this->assertSame(Moderation::EnAttente, $vetement->moderation);
         Storage::disk('public')->assertExists($vetement->photo);
     }
 

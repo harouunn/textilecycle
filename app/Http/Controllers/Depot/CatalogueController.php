@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Depot;
 
-use App\Enums\Depot\StatutVetement;
+use App\Enums\Depot\Moderation;
 use App\Http\Controllers\Controller;
 use App\Models\Categorie;
 use App\Models\Vetement;
@@ -21,13 +21,13 @@ class CatalogueController extends Controller
         ]);
 
         $categories = Categorie::query()
-            ->withCount(['vetements' => fn ($query) => $query->where('statut', StatutVetement::Disponible)])
+            ->withCount(['vetements' => fn ($query) => $query->auCatalogue()])
             ->orderBy('nom')
             ->get();
 
         $vetements = Vetement::query()
             ->with('categorie')
-            ->where('statut', StatutVetement::Disponible)
+            ->auCatalogue()
             ->filter($filters)
             ->latest('date_depot')
             ->latest('id')
@@ -42,15 +42,17 @@ class CatalogueController extends Controller
     }
 
     /**
-     * Fiche détaillée d'un vêtement.
+     * Fiche détaillée d'un vêtement. Un vêtement pas encore approuvé n'est visible que par son déposant.
      */
-    public function show(Vetement $vetement): View
+    public function show(Request $request, Vetement $vetement): View
     {
+        abort_unless($vetement->moderation === Moderation::Approuve || $request->user()?->id === $vetement->user_id, 404);
+
         $vetement->load('categorie');
 
         $similaires = Vetement::query()
             ->with('categorie')
-            ->where('statut', StatutVetement::Disponible)
+            ->auCatalogue()
             ->where('categorie_id', $vetement->categorie_id)
             ->whereKeyNot($vetement->id)
             ->latest('date_depot')

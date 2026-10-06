@@ -10,6 +10,7 @@
     .tc-error { margin-top: .25rem; color: rgb(var(--v-theme-error)); font-size: .8125rem; }
     .tc-alert { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; border-radius: 6px; background: rgba(var(--v-theme-success), .16); color: rgb(var(--v-theme-success)); }
     .tc-alert--error { background: rgba(var(--v-theme-error), .16); color: rgb(var(--v-theme-error)); }
+    .tc-alert--info { align-items: flex-start; background: rgba(var(--v-theme-info), .16); color: rgb(var(--v-theme-info)); }
     .tc-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
     .tc-photo { width: 100%; max-height: 420px; object-fit: cover; border-radius: 6px; }
     .v-table table { width: 100%; }

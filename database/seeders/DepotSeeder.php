@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Depot\Moderation;
 use App\Enums\Depot\StatutVetement;
 use App\Models\Categorie;
 use App\Models\User;
@@ -9,7 +10,7 @@ use App\Models\Vetement;
 use Illuminate\Database\Seeder;
 
 /**
- * Module « Dépôt & vêtements » : 6 catégories et 20 vêtements.
+ * Module « Dépôt & vêtements » : 6 catégories et 20 vêtements, dont 3 en attente de validation.
  *
  * php artisan db:seed --class=DepotSeeder
  */
@@ -38,6 +39,8 @@ class DepotSeeder extends Seeder
                 'categorie_id' => $categories[$sequence->index % $categories->count()]->id,
                 'user_id' => $deposants->random()->id,
                 'statut' => $sequence->index < 14 ? StatutVetement::Disponible : fake()->randomElement(StatutVetement::cases()),
+                // Les 3 derniers attendent la validation de l'admin
+                'moderation' => $sequence->index >= 17 ? Moderation::EnAttente : Moderation::Approuve,
             ])
             ->create();
     }

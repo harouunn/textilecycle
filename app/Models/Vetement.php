@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Depot\Etat;
 use App\Enums\Depot\Genre;
+use App\Enums\Depot\Moderation;
 use App\Enums\Depot\StatutVetement;
 use App\Enums\Depot\Taille;
 use Database\Factories\VetementFactory;
@@ -21,6 +22,9 @@ class Vetement extends Model
 
     public const PHOTO_DIRECTORY = 'vetements';
 
+    /** Clé de session de la photo enregistrée par « Analyser la photo », en attente du dépôt. */
+    public const SESSION_PHOTO_ANALYSEE = 'depot.photo_analysee';
+
     /**
      * @var list<string>
      */
@@ -35,6 +39,8 @@ class Vetement extends Model
         'etat',
         'photo',
         'statut',
+        'moderation',
+        'motif_refus',
         'date_depot',
     ];
 
@@ -43,6 +49,7 @@ class Vetement extends Model
      */
     protected $attributes = [
         'statut' => 'disponible',
+        'moderation' => 'approuve',
     ];
 
     /**
@@ -55,8 +62,19 @@ class Vetement extends Model
             'genre' => Genre::class,
             'etat' => Etat::class,
             'statut' => StatutVetement::class,
+            'moderation' => Moderation::class,
             'date_depot' => 'date',
         ];
+    }
+
+    /**
+     * Vêtements visibles dans le catalogue public : approuvés par l'admin et disponibles.
+     *
+     * @param  Builder<Vetement>  $query
+     */
+    public function scopeAuCatalogue(Builder $query): void
+    {
+        $query->where('moderation', Moderation::Approuve)->where('statut', StatutVetement::Disponible);
     }
 
     /**
@@ -105,6 +123,7 @@ class Vetement extends Model
             ->when($filters['search'] ?? null, fn (Builder $query, string $search) => $query->where('titre', 'like', "%{$search}%"))
             ->when($filters['categorie'] ?? null, fn (Builder $query, $categorieId) => $query->where('categorie_id', $categorieId))
             ->when($filters['etat'] ?? null, fn (Builder $query, string $etat) => $query->where('etat', $etat))
-            ->when($filters['statut'] ?? null, fn (Builder $query, string $statut) => $query->where('statut', $statut));
+            ->when($filters['statut'] ?? null, fn (Builder $query, string $statut) => $query->where('statut', $statut))
+            ->when($filters['moderation'] ?? null, fn (Builder $query, string $moderation) => $query->where('moderation', $moderation));
     }
 }

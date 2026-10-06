@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin\Depot;
 
 use App\Enums\Depot\Etat;
+use App\Enums\Depot\Moderation;
 use App\Enums\Depot\StatutVetement;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Depot\Concerns\AnalysePhotoVetement;
 use App\Http\Controllers\Depot\Concerns\GerePhotoVetement;
+use App\Http\Requests\Depot\AnalyserVetementRequest;
+use App\Http\Requests\Depot\RefuserVetementRequest;
 use App\Http\Requests\Depot\StoreVetementRequest;
 use App\Http\Requests\Depot\UpdateVetementRequest;
 use App\Models\Categorie;
@@ -18,7 +22,7 @@ use Illuminate\View\View;
 
 class VetementController extends Controller
 {
-    use GerePhotoVetement;
+    use AnalysePhotoVetement, GerePhotoVetement;
 
     /**
      * Display a listing of the resource.
@@ -30,6 +34,7 @@ class VetementController extends Controller
             'categorie' => ['nullable', 'integer'],
             'etat' => ['nullable', Rule::enum(Etat::class)],
             'statut' => ['nullable', Rule::enum(StatutVetement::class)],
+            'moderation' => ['nullable', Rule::enum(Moderation::class)],
         ]);
 
         $vetements = Vetement::query()
@@ -56,6 +61,14 @@ class VetementController extends Controller
             'user_id' => $request->user()->id,
             'date_depot' => today(),
         ])));
+    }
+
+    /**
+     * « Analyser la photo » : classement automatique puis retour au formulaire pré-rempli.
+     */
+    public function analyser(AnalyserVetementRequest $request): RedirectResponse
+    {
+        return $this->analyserPhoto($request, 'admin.depot.vetements.create');
     }
 
     /**
@@ -98,6 +111,33 @@ class VetementController extends Controller
         return redirect()
             ->route('admin.depot.vetements.index')
             ->with('success', "Le vêtement « {$vetement->titre} » a été modifié.");
+    }
+
+    /**
+     * Publie le vêtement dans le catalogue.
+     */
+    public function approuver(Request $request, Vetement $vetement): RedirectResponse
+    {
+        $vetement->update(['moderation' => Moderation::Approuve, 'motif_refus' => null]);
+
+        // Bouton rapide de la page « Dépôts à valider » : on y revient pour traiter le suivant.
+        $redirection = $request->input('retour') === 'liste'
+            ? redirect()->route('admin.depot.vetements.index', ['moderation' => Moderation::EnAttente->value])
+            : redirect()->route('admin.depot.vetements.show', $vetement);
+
+        return $redirection->with('success', "Le vêtement « {$vetement->titre} » est approuvé : il apparaît dans le catalogue.");
+    }
+
+    /**
+     * Refuse le dépôt : il reste hors du catalogue et le déposant voit le motif.
+     */
+    public function refuser(RefuserVetementRequest $request, Vetement $vetement): RedirectResponse
+    {
+        $vetement->update(['moderation' => Moderation::Refuse, 'motif_refus' => $request->validated('motif_refus')]);
+
+        return redirect()
+            ->route('admin.depot.vetements.show', $vetement)
+            ->with('success', "Le vêtement « {$vetement->titre} » a été refusé.");
     }
 
     /**

@@ -26,6 +26,7 @@ Route::prefix('depot')->name('depot.')->group(function () {
 
     // « Déposer un vêtement » (create) et « Mes dépôts » (index, edit, update, destroy)
     Route::middleware('auth')->group(function () {
+        Route::post('mes-depots/analyser', [MesDepotsController::class, 'analyser'])->name('mes-depots.analyser');
         Route::resource('mes-depots', MesDepotsController::class)
             ->except('show')
             ->parameters(['mes-depots' => 'vetement']);
@@ -38,5 +39,8 @@ Route::middleware('auth')->prefix('admin/depot')->name('admin.depot.')->group(fu
         ->except('show')
         ->parameters(['categories' => 'categorie']);
 
+    Route::post('vetements/analyser', [VetementController::class, 'analyser'])->name('vetements.analyser');
+    Route::patch('vetements/{vetement}/approuver', [VetementController::class, 'approuver'])->name('vetements.approuver');
+    Route::patch('vetements/{vetement}/refuser', [VetementController::class, 'refuser'])->name('vetements.refuser');
     Route::resource('vetements', VetementController::class);
 });

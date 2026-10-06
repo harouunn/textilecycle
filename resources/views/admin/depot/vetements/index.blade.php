@@ -1,6 +1,8 @@
 @extends('layouts.back')
 
-@section('title', 'Vêtements')
+@php($aValider = ($filters['moderation'] ?? null) === \App\Enums\Depot\Moderation::EnAttente->value)
+
+@section('title', $aValider ? 'Dépôts à valider' : 'Vêtements')
 
 @section('content')
   @include('admin.depot.partials.styles')
@@ -9,8 +11,10 @@
   <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
     <div class="v-card-item">
       <div class="v-card-item__content">
-        <div class="v-card-title">Dépôt &amp; vêtements</div>
-        <div class="v-card-subtitle">{{ $vetements->total() }} vêtement(s)</div>
+        <div class="v-card-title">{{ $aValider ? 'Dépôts à valider' : 'Dépôt & vêtements' }}</div>
+        <div class="v-card-subtitle">
+          {{ $aValider ? $vetements->total().' dépôt(s) de clients en attente : approuvez-les pour les publier dans le catalogue.' : $vetements->total().' vêtement(s)' }}
+        </div>
       </div>
       <div class="v-card-item__append">
         @include('admin.depot.partials.btn', ['label' => 'Ajouter un vêtement', 'icon' => 'bx-plus', 'href' => route('admin.depot.vetements.create')])
@@ -25,7 +29,7 @@
             <label for="search" class="tc-label">Titre</label>
             <input id="search" type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Rechercher par titre…" class="tc-control">
           </div>
-          <div class="v-col-md-3 v-col-sm-6 v-col-12">
+          <div class="v-col-md-2 v-col-sm-6 v-col-12">
             <label for="categorie" class="tc-label">Catégorie</label>
             <select id="categorie" name="categorie" class="tc-control">
               <option value="">Toutes</option>
@@ -52,7 +56,16 @@
               @endforeach
             </select>
           </div>
-          <div class="v-col-md-2 v-col-12 d-flex align-end gap-2">
+          <div class="v-col-md-3 v-col-sm-6 v-col-12">
+            <label for="moderation" class="tc-label">Validation</label>
+            <select id="moderation" name="moderation" class="tc-control">
+              <option value="">Toutes</option>
+              @foreach (\App\Enums\Depot\Moderation::options() as $value => $label)
+                <option value="{{ $value }}" @selected(($filters['moderation'] ?? null) === $value)>{{ $label }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="v-col-12 d-flex align-end gap-2">
             @include('admin.depot.partials.btn', ['label' => 'Filtrer', 'icon' => 'bx-filter', 'variant' => 'tonal'])
             @if (array_filter($filters))
               @include('admin.depot.partials.btn', ['title' => 'Réinitialiser les filtres', 'icon' => 'bx-reset', 'iconOnly' => true, 'variant' => 'text', 'color' => 'secondary', 'href' => route('admin.depot.vetements.index')])
@@ -72,6 +85,7 @@
               <th class="text-start">Taille</th>
               <th class="text-start">État</th>
               <th class="text-start">Statut</th>
+              <th class="text-start">Validation</th>
               <th class="text-start">Déposé le</th>
               <th class="text-end">Actions</th>
             </tr>
@@ -92,8 +106,17 @@
                 <td>{{ $vetement->taille->label() }}</td>
                 <td>{{ $vetement->etat->label() }}</td>
                 <td>@include('admin.depot.partials.chip', ['label' => $vetement->statut->label(), 'color' => $vetement->statut->color()])</td>
+                <td>@include('admin.depot.partials.chip', ['label' => $vetement->moderation->label(), 'color' => $vetement->moderation->color()])</td>
                 <td>{{ $vetement->date_depot->format('d/m/Y') }}</td>
                 <td class="text-end">
+                  @if ($vetement->moderation === \App\Enums\Depot\Moderation::EnAttente)
+                    <form method="POST" action="{{ route('admin.depot.vetements.approuver', $vetement) }}" class="d-inline">
+                      @csrf
+                      @method('PATCH')
+                      <input type="hidden" name="retour" value="liste">
+                      @include('admin.depot.partials.btn', ['title' => 'Approuver et publier', 'icon' => 'bx-check-circle', 'iconOnly' => true, 'variant' => 'text', 'size' => 'small', 'color' => 'success'])
+                    </form>
+                  @endif
                   @include('admin.depot.partials.btn', ['title' => 'Voir', 'icon' => 'bx-show', 'iconOnly' => true, 'variant' => 'text', 'size' => 'small', 'color' => 'default', 'href' => route('admin.depot.vetements.show', $vetement)])
                   @include('admin.depot.partials.btn', ['title' => 'Modifier', 'icon' => 'bx-edit-alt', 'iconOnly' => true, 'variant' => 'text', 'size' => 'small', 'color' => 'default', 'href' => route('admin.depot.vetements.edit', $vetement)])
                   <form method="POST" action="{{ route('admin.depot.vetements.destroy', $vetement) }}" class="d-inline" onsubmit="return confirm(@js("Supprimer « {$vetement->titre} » ?"))">
@@ -105,7 +128,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="7" class="text-center text-disabled py-6">Aucun vêtement ne correspond à votre recherche.</td>
+                <td colspan="8" class="text-center text-disabled py-6">{{ $aValider ? 'Aucun dépôt en attente : tous les dépôts des clients ont été traités.' : 'Aucun vêtement ne correspond à votre recherche.' }}</td>
               </tr>
             @endforelse
           </tbody>

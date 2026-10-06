@@ -29,6 +29,7 @@
                 <th scope="col">Taille</th>
                 <th scope="col">État</th>
                 <th scope="col">Statut</th>
+                <th scope="col">Validation</th>
                 <th scope="col">Déposé le</th>
                 <th scope="col" class="text-end">Actions</th>
               </tr>
@@ -46,6 +47,13 @@
                   <td>{{ $vetement->taille->label() }}</td>
                   <td>{{ $vetement->etat->label() }}</td>
                   <td><span class="badge text-bg-{{ $vetement->statut->color() }}">{{ $vetement->statut->label() }}</span></td>
+                  <td>
+                    <span class="badge text-bg-{{ $vetement->moderation === \App\Enums\Depot\Moderation::Refuse ? 'danger' : $vetement->moderation->color() }}">{{ $vetement->moderation->label() }}</span>
+                    @if ($vetement->motif_refus)
+                      <div class="small text-danger mt-1">{{ $vetement->motif_refus }}</div>
+                      <div class="small">Modifiez votre dépôt pour le soumettre à nouveau.</div>
+                    @endif
+                  </td>
                   <td>{{ $vetement->date_depot->format('d/m/Y') }}</td>
                   <td class="text-end text-nowrap">
                     <a href="{{ route('depot.mes-depots.edit', $vetement) }}" class="btn btn-sm btn-outline-dark">Modifier</a>

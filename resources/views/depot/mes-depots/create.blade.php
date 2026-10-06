@@ -12,10 +12,11 @@
 
       <div class="bg-white p-4 p-md-5">
         @include('depot.partials.flash')
+        @include('depot.partials.analyse')
 
         <form method="POST" action="{{ route('depot.mes-depots.store') }}" enctype="multipart/form-data">
           @csrf
-          @include('depot.mes-depots._form', ['submitLabel' => 'Déposer mon vêtement'])
+          @include('depot.mes-depots._form', ['submitLabel' => 'Déposer mon vêtement', 'analyseRoute' => 'depot.mes-depots.analyser'])
         </form>
       </div>
     </div>

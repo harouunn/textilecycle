@@ -79,11 +79,24 @@
         <img src="{{ $vetement->photo_url }}" alt="Photo actuelle" class="tc-thumb">
         <small>Laissez vide pour conserver la photo actuelle.</small>
       </div>
+    @elseif (! $vetement->exists && session(\App\Models\Vetement::SESSION_PHOTO_ANALYSEE))
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <img src="{{ asset('storage/'.session(\App\Models\Vetement::SESSION_PHOTO_ANALYSEE)) }}" alt="Photo analysée" class="tc-thumb">
+        <small>Photo analysée : elle sera utilisée si vous n'en choisissez pas une autre.</small>
+      </div>
     @endif
-    <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
-      @class(['form-control', 'is-invalid' => $errors->has('photo')])>
+    <div class="d-flex flex-wrap gap-2">
+      <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+        @class(['form-control flex-grow-1 w-auto', 'is-invalid' => $errors->has('photo')])>
+      @isset($analyseRoute)
+        <button type="submit" formaction="{{ route($analyseRoute) }}" formnovalidate class="btn btn-outline-dark text-uppercase">Analyser la photo</button>
+      @endisset
+    </div>
+    @isset($analyseRoute)
+      <div class="form-text">Indiquez le titre (ex. « Chemise en lin bleue, taille M »), choisissez la photo puis cliquez sur « Analyser » : catégorie, matière, état et description sont proposés automatiquement.</div>
+    @endisset
     @error('photo')
-      <div class="invalid-feedback">{{ $message }}</div>
+      <div class="invalid-feedback d-block">{{ $message }}</div>
     @enderror
   </div>
 

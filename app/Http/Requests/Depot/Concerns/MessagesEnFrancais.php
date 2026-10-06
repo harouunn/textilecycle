@@ -55,6 +55,7 @@ trait MessagesEnFrancais
             'photo' => 'photo',
             'statut' => 'statut',
             'date_depot' => 'date de dépôt',
+            'motif_refus' => 'motif du refus',
         ];
     }
 }
