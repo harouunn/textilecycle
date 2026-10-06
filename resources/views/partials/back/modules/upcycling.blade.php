@@ -2,5 +2,6 @@
 @include('partials.back.nav-link', [
   'title' => 'Upcycling',
   'icon' => 'bx-palette',
-  'href' => '#',
+  'href' => route('admin.upcycling.projets.index'),
+  'active' => request()->routeIs('admin.upcycling.*'),
 ])
