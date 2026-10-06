@@ -1,27 +1,3 @@
-@php
-  $menu = [
-    ['title' => 'Tableau de bord', 'icon' => 'bx-home-smile', 'route' => 'admin.dashboard'],
-
-    ['section' => 'Cycle des vêtements'],
-    ['title' => 'Dépôts', 'icon' => 'bx-package'],
-    ['title' => 'Réparations', 'icon' => 'bx-wrench'],
-    ['title' => 'Upcycling', 'icon' => 'bx-palette'],
-    ['title' => 'Dons', 'icon' => 'bx-donate-heart'],
-
-    ['section' => 'Partenaires'],
-    ['title' => 'Ateliers', 'icon' => 'bx-store-alt', 'route' => 'admin.ateliers.index'],
-    ['title' => 'Associations', 'icon' => 'bx-group'],
-    ['title' => 'Collecte', 'icon' => 'bx-map'],
-
-    ['section' => 'Administration'],
-    ['title' => 'Utilisateurs', 'icon' => 'bx-user'],
-    ['title' => 'Statistiques', 'icon' => 'bx-bar-chart-alt-2'],
-
-    ['section' => 'Raccourcis'],
-    ['title' => 'Mon profil', 'icon' => 'bx-cog', 'route' => 'profile.edit'],
-    ['title' => 'Voir le site', 'icon' => 'bx-show', 'route' => 'home'],
-  ];
-@endphp
 
 <aside data-v-0433a762 class="layout-vertical-nav" data-nav>
   <div data-v-0433a762 class="nav-header">
@@ -41,23 +17,28 @@
   <div data-v-0433a762 class="vertical-nav-items-shadow"></div>
 
   <ul data-v-0433a762 class="nav-items" data-nav-items>
-    @foreach ($menu as $item)
-      @if (isset($item['section']))
-        <li class="nav-section-title">
-          <div class="title-wrapper"><span class="title-text">{{ $item['section'] }}</span></div>
-        </li>
-      @else
-        @php($isActive = isset($item['route']) && (request()->routeIs($item['route']) || (str_contains($item['route'], 'ateliers') && request()->routeIs('admin.ateliers.*'))))
-        <li class="nav-link">
-          <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" @class(['router-link-active router-link-exact-active' => $isActive]) @if ($isActive) aria-current="page" @endif>
-            <i class="{{ $item['icon'] }} v-icon notranslate v-theme--light v-icon--size-default nav-item-icon" aria-hidden="true"></i>
-            <span class="nav-item-title">{{ $item['title'] }}</span>
-            @unless (isset($item['route']))
-              <span class="nav-item-badge bg-light-primary text-primary">Bientôt</span>
-            @endunless
-          </a>
-        </li>
-      @endif
-    @endforeach
+
+    @include('partials.back.nav-link', ['title' => 'Tableau de bord', 'icon' => 'bx-home-smile', 'href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard')])
+
+    <li class="nav-section-title">
+      <div class="title-wrapper"><span class="title-text">Cycle des vêtements</span></div>
+    </li>
+    {{-- Une entrée par module : chaque équipe ne modifie que son fichier dans partials/back/modules/ --}}
+    @include('partials.back.modules.depot')
+    @include('partials.back.modules.ateliers')
+    @include('partials.back.modules.upcycling')
+    @include('partials.back.modules.dons')
+
+    <li class="nav-section-title">
+      <div class="title-wrapper"><span class="title-text">Administration</span></div>
+    </li>
+    @include('partials.back.nav-link', ['title' => 'Utilisateurs', 'icon' => 'bx-user', 'href' => route('admin.users.index'), 'active' => request()->routeIs('admin.users.*')])
+    @include('partials.back.nav-link', ['title' => 'Statistiques', 'icon' => 'bx-bar-chart-alt-2', 'href' => route('admin.statistiques'), 'active' => request()->routeIs('admin.statistiques')])
+
+    <li class="nav-section-title">
+      <div class="title-wrapper"><span class="title-text">Raccourcis</span></div>
+    </li>
+    @include('partials.back.nav-link', ['title' => 'Mon profil', 'icon' => 'bx-cog', 'href' => route('profile.edit'), 'active' => request()->routeIs('profile.edit')])
+    @include('partials.back.nav-link', ['title' => 'Voir le site', 'icon' => 'bx-show', 'href' => route('home')])
   </ul>
 </aside>

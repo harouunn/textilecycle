@@ -34,10 +34,11 @@
                 <a class="nav-link dropdown-toggle" href="#" id="dropdownServices" data-bs-toggle="dropdown"
                   aria-haspopup="true" aria-expanded="false">Nos services</a>
                 <ul class="dropdown-menu list-unstyled" aria-labelledby="dropdownServices">
-                  <li><a href="{{ route('home') }}#services" class="dropdown-item item-anchor">Déposer des vêtements</a></li>
-                  <li><a href="{{ route('home') }}#services" class="dropdown-item item-anchor">Réparation</a></li>
-                  <li><a href="{{ route('home') }}#services" class="dropdown-item item-anchor">Upcycling</a></li>
-                  <li><a href="{{ route('home') }}#services" class="dropdown-item item-anchor">Don aux associations</a></li>
+                  {{-- Une entrée par module : chaque équipe ne modifie que son fichier dans partials/front/modules/ --}}
+                  @include('partials.front.modules.depot')
+                  @include('partials.front.modules.ateliers')
+                  @include('partials.front.modules.upcycling')
+                  @include('partials.front.modules.dons')
                 </ul>
               </li>
               <li class="nav-item">

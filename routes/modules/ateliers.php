@@ -13,6 +13,7 @@
 |
 */
 
+
 use App\Http\Controllers\Admin\Ateliers\AtelierController as AdminAtelierController;
 use App\Http\Controllers\Admin\Ateliers\DemandeReparationController as AdminDemandeReparationController;
 use App\Http\Controllers\Ateliers\AtelierController;
@@ -43,3 +44,4 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('ateliers', AdminAtelierController::class)
         ->where(['atelier' => '[0-9]+']);
 });
+
