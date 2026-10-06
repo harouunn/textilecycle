@@ -1,3 +1,4 @@
+
 <aside data-v-0433a762 class="layout-vertical-nav" data-nav>
   <div data-v-0433a762 class="nav-header">
     <a data-v-fba8a720 href="{{ route('admin.dashboard') }}" class="app-logo app-title-wrapper">
@@ -16,6 +17,7 @@
   <div data-v-0433a762 class="vertical-nav-items-shadow"></div>
 
   <ul data-v-0433a762 class="nav-items" data-nav-items>
+
     @include('partials.back.nav-link', ['title' => 'Tableau de bord', 'icon' => 'bx-home-smile', 'href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard')])
 
     <li class="nav-section-title">
@@ -30,8 +32,8 @@
     <li class="nav-section-title">
       <div class="title-wrapper"><span class="title-text">Administration</span></div>
     </li>
-    @include('partials.back.nav-link', ['title' => 'Utilisateurs', 'icon' => 'bx-user', 'badge' => 'Bientôt'])
-    @include('partials.back.nav-link', ['title' => 'Statistiques', 'icon' => 'bx-bar-chart-alt-2', 'badge' => 'Bientôt'])
+    @include('partials.back.nav-link', ['title' => 'Utilisateurs', 'icon' => 'bx-user', 'href' => route('admin.users.index'), 'active' => request()->routeIs('admin.users.*')])
+    @include('partials.back.nav-link', ['title' => 'Statistiques', 'icon' => 'bx-bar-chart-alt-2', 'href' => route('admin.statistiques'), 'active' => request()->routeIs('admin.statistiques')])
 
     <li class="nav-section-title">
       <div class="title-wrapper"><span class="title-text">Raccourcis</span></div>
