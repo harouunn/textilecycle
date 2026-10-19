@@ -3,15 +3,12 @@
 @section('title', 'Mes dons')
 
 @section('content')
-<section class="bg-light py-5">
-  <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-    <div>
-      <h1 class="section-title mt-3 mb-1">Mes dons</h1>
-      <p class="mb-0 text-muted">Suivez l'avancement des dons que vous avez proposés.</p>
-    </div>
-    <a href="{{ route('dons.index') }}" class="btn btn-dark rounded-pill">Faire un nouveau don</a>
-  </div>
-</section>
+<div class="tc-page">
+  <x-ui.hero surtitre="Mon espace" titre="Mes dons" sous-titre="Suivez l'avancement des dons que vous avez proposés."
+    :fil="['Dons' => route('dons.index'), 'Mes dons' => null]">
+    <a href="{{ route('dons.index') }}" class="tc-btn">Faire un nouveau don</a>
+  </x-ui.hero>
+</div>
 
 <section class="py-5">
   <div class="container">

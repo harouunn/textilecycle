@@ -56,8 +56,11 @@
                     {{ Auth::user()->name }}
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end list-unstyled" aria-labelledby="dropdownAccount">
-                    <li><a href="{{ route('admin.dashboard') }}" class="dropdown-item item-anchor">Tableau de bord</a></li>
+                    @if (Auth::user()->isAdmin())
+                      <li><a href="{{ route('admin.dashboard') }}" class="dropdown-item item-anchor">Tableau de bord</a></li>
+                    @endif
                     <li><a href="{{ route('profile.edit') }}" class="dropdown-item item-anchor">Mon profil</a></li>
+                    <li><a href="{{ route('securite.show') }}" class="dropdown-item item-anchor">Sécurité du compte</a></li>
                     <li>
                       <form method="POST" action="{{ route('logout') }}">
                         @csrf

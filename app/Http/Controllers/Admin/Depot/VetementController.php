@@ -3,14 +3,22 @@
 namespace App\Http\Controllers\Admin\Depot;
 
 use App\Enums\Depot\Etat;
+use App\Enums\Depot\Moderation;
 use App\Enums\Depot\StatutVetement;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Depot\Concerns\AnalysePhotoVetement;
 use App\Http\Controllers\Depot\Concerns\GerePhotoVetement;
+use App\Http\Requests\Depot\AnalyserVetementRequest;
+use App\Http\Requests\Depot\RefuserVetementRequest;
 use App\Http\Requests\Depot\StoreVetementRequest;
 use App\Http\Requests\Depot\UpdateVetementRequest;
+use App\Models\Association;
+use App\Models\Atelier;
 use App\Models\Categorie;
 use App\Models\User;
 use App\Models\Vetement;
+use App\Services\Depot\DetecteurDoublons;
+use App\Services\Depot\StatistiquesDepot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,22 +26,23 @@ use Illuminate\View\View;
 
 class VetementController extends Controller
 {
-    use GerePhotoVetement;
+    use AnalysePhotoVetement, GerePhotoVetement;
 
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request, StatistiquesDepot $statistiques): View
     {
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'categorie' => ['nullable', 'integer'],
             'etat' => ['nullable', Rule::enum(Etat::class)],
             'statut' => ['nullable', Rule::enum(StatutVetement::class)],
+            'moderation' => ['nullable', Rule::enum(Moderation::class)],
         ]);
 
         $vetements = Vetement::query()
-            ->with('categorie')
+            ->with(['categorie', 'user'])
             ->filter($filters)
             ->latest('date_depot')
             ->latest('id')
@@ -43,7 +52,8 @@ class VetementController extends Controller
         return view('admin.depot.vetements.index', [
             'vetements' => $vetements,
             'filters' => $filters,
-            'categories' => Categorie::query()->orderBy('nom')->pluck('nom', 'id'),
+            'categories' => Categorie::query()->orderBy('ordre')->orderBy('nom')->pluck('nom', 'id'),
+            'stats' => $statistiques->vetements(),
         ]);
     }
 
@@ -56,6 +66,14 @@ class VetementController extends Controller
             'user_id' => $request->user()->id,
             'date_depot' => today(),
         ])));
+    }
+
+    /**
+     * « Analyser la photo » : classement automatique puis retour au formulaire pré-rempli.
+     */
+    public function analyser(AnalyserVetementRequest $request): RedirectResponse
+    {
+        return $this->analyserPhoto($request, 'admin.depot.vetements.create');
     }
 
     /**
@@ -75,9 +93,21 @@ class VetementController extends Controller
      */
     public function show(Vetement $vetement): View
     {
-        $vetement->load(['categorie', 'user']);
+        $vetement->load([
+            'categorie',
+            'user',
+            'reservations' => fn ($query) => $query->with('user')->latest('id'),
+            'demandesReparation.atelier',
+            'projetsUpcycling',
+            'dons.association',
+        ]);
 
-        return view('admin.depot.vetements.show', compact('vetement'));
+        return view('admin.depot.vetements.show', [
+            'vetement' => $vetement,
+            'doublons' => app(DetecteurDoublons::class)->doublonsDe($vetement),
+            'ateliers' => Atelier::query()->actif()->orderBy('nom')->pluck('nom', 'id'),
+            'associations' => Association::query()->where('active', true)->orderBy('nom')->pluck('nom', 'id'),
+        ]);
     }
 
     /**
@@ -101,6 +131,33 @@ class VetementController extends Controller
     }
 
     /**
+     * Publie le vêtement dans le catalogue.
+     */
+    public function approuver(Request $request, Vetement $vetement): RedirectResponse
+    {
+        $vetement->update(['moderation' => Moderation::Approuve, 'motif_refus' => null]);
+
+        // Bouton rapide de la page « Dépôts à valider » : on y revient pour traiter le suivant.
+        $redirection = $request->input('retour') === 'liste'
+            ? redirect()->route('admin.depot.vetements.index', ['moderation' => Moderation::EnAttente->value])
+            : redirect()->route('admin.depot.vetements.show', $vetement);
+
+        return $redirection->with('success', "Le vêtement « {$vetement->titre} » est approuvé : il apparaît dans le catalogue.");
+    }
+
+    /**
+     * Refuse le dépôt : il reste hors du catalogue et le déposant voit le motif.
+     */
+    public function refuser(RefuserVetementRequest $request, Vetement $vetement): RedirectResponse
+    {
+        $vetement->update(['moderation' => Moderation::Refuse, 'motif_refus' => $request->validated('motif_refus')]);
+
+        return redirect()
+            ->route('admin.depot.vetements.show', $vetement)
+            ->with('success', "Le vêtement « {$vetement->titre} » a été refusé.");
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Vetement $vetement): RedirectResponse
@@ -120,7 +177,7 @@ class VetementController extends Controller
     {
         return [
             'vetement' => $vetement,
-            'categories' => Categorie::query()->orderBy('nom')->pluck('nom', 'id'),
+            'categories' => Categorie::query()->orderBy('ordre')->orderBy('nom')->pluck('nom', 'id'),
             'users' => User::query()->orderBy('name')->pluck('name', 'id'),
         ];
     }

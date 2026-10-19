@@ -53,7 +53,7 @@ class UpcyclingValidationTest extends TestCase
         Storage::disk('public')->put('existing/avant.png', $this->image()->getContent());
         Storage::disk('public')->put('existing/apres.png', $this->image()->getContent());
 
-        return ProjetUpcycling::factory()->create(['photo_avant' => 'existing/avant.png', 'photo_apres' => 'existing/apres.png']);
+        return ProjetUpcycling::factory()->for(User::factory()->admin())->create(['photo_avant' => 'existing/avant.png', 'photo_apres' => 'existing/apres.png']);
     }
 
     private function existingStep(ProjetUpcycling $p): EtapeProjet
@@ -173,7 +173,7 @@ class UpcyclingValidationTest extends TestCase
     #[DataProvider('offices')]
     public function test_valid_creation_update_and_existing_images(string $office): void
     {
-        $u = User::factory()->create();
+        $u = User::factory()->admin()->create();
         $this->actingAs($u);
         $this->post(route($office.'.projets.store'), $this->projetData())->assertSessionHasNoErrors()->assertRedirect();
         $p = ProjetUpcycling::firstOrFail();
@@ -202,7 +202,7 @@ class UpcyclingValidationTest extends TestCase
     #[DataProvider('offices')]
     public function test_photos_required_and_missing_stored_images_do_not_satisfy_requirement(string $office): void
     {
-        $p = ProjetUpcycling::factory()->create(['photo_avant' => 'missing.png', 'photo_apres' => null]);
+        $p = ProjetUpcycling::factory()->for(User::factory()->admin())->create(['photo_avant' => 'missing.png', 'photo_apres' => null]);
         $this->actingAs($p->user);
         foreach ([false, true] as $update) {
             foreach (['__absent__', '', " \t "] as $value) {
@@ -267,7 +267,7 @@ class UpcyclingValidationTest extends TestCase
     #[DataProvider('offices')]
     public function test_jpeg_png_webp_and_boundary_values_are_accepted(string $office): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         foreach (['jpg', 'png', 'webp'] as $ext) {
             $d = $this->projetData();
             $d['titre'] = '12345';

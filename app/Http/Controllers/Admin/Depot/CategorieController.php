@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin\Depot;
 
+use App\Enums\Depot\Moderation;
+use App\Enums\Depot\StatutVetement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Depot\StoreCategorieRequest;
 use App\Http\Requests\Depot\UpdateCategorieRequest;
@@ -20,8 +22,14 @@ class CategorieController extends Controller
         $search = $request->validate(['search' => ['nullable', 'string', 'max:100']])['search'] ?? null;
 
         $categories = Categorie::query()
-            ->withCount('vetements')
+            ->withCount([
+                'vetements',
+                'vetements as disponibles_count' => fn ($query) => $query
+                    ->where('moderation', Moderation::Approuve)
+                    ->where('statut', StatutVetement::Disponible),
+            ])
             ->when($search, fn ($query) => $query->where('nom', 'like', "%{$search}%"))
+            ->orderBy('ordre')
             ->orderBy('nom')
             ->paginate(10)
             ->withQueryString();
@@ -34,7 +42,9 @@ class CategorieController extends Controller
      */
     public function create(): View
     {
-        return view('admin.depot.categories.create', ['categorie' => new Categorie]);
+        return view('admin.depot.categories.create', [
+            'categorie' => new Categorie(['ordre' => (int) Categorie::query()->max('ordre') + 1]),
+        ]);
     }
 
     /**

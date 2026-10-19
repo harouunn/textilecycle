@@ -5,22 +5,18 @@
 @section('content')
 @include('upcycling.partials.styles')
 
-<section class="bg-light py-5">
-  <div class="container py-md-4">
-    <div class="row justify-content-center text-center">
-      <div class="col-lg-8">
-        <h1 class="section-title mb-3">Upcycling</h1>
-        <p class="mb-4">Vieux jean, chemise usée, pull troué : découvrez des tutoriels pas à pas pour transformer vos vêtements en créations utiles et uniques.</p>
-        @auth
-          <a href="{{ route('upcycling.projets.create') }}" class="btn btn-dark text-uppercase me-2">Proposer un projet</a>
-          <a href="{{ route('upcycling.mes-projets') }}" class="btn btn-outline-dark text-uppercase">Mes projets</a>
-        @else
-          <a href="{{ route('login') }}" class="btn btn-outline-dark text-uppercase">Connectez-vous pour proposer un projet</a>
-        @endauth
-      </div>
-    </div>
-  </div>
-</section>
+<div class="tc-page">
+  <x-ui.hero surtitre="Transformation" titre="Upcycling"
+    sous-titre="Vieux jean, chemise usée, pull troué : découvrez des tutoriels pas à pas pour transformer vos vêtements en créations utiles et uniques."
+    :fil="['Accueil' => route('home'), 'Upcycling' => null]">
+    @auth
+      <a href="{{ route('upcycling.projets.create') }}" class="tc-btn">Proposer un projet</a>
+      <a href="{{ route('upcycling.mes-projets') }}" class="tc-btn tc-btn--clair">Mes projets</a>
+    @else
+      <a href="{{ route('login') }}" class="tc-btn tc-btn--clair">Connectez-vous pour proposer un projet</a>
+    @endauth
+  </x-ui.hero>
+</div>
 
 <section class="py-5">
   <div class="container">

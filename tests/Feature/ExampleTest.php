@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    // L'accueil affiche des chiffres réels : il lui faut la base de test.
+    use RefreshDatabase;
+
     /**
      * A basic test example.
      */

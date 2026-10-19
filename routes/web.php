@@ -1,18 +1,16 @@
 <?php
 
-use App\Http\Controllers\AtelierController;
+use App\Http\Controllers\AccueilController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Front office
-Route::view('/', 'front.home')->name('home');
+Route::get('/', AccueilController::class)->name('home');
 
 // Back office
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::view('/', 'admin.dashboard')->name('dashboard');
-    
-    // Ateliers CRUD
-    Route::resource('ateliers', AtelierController::class);
+    Route::get('/', DashboardController::class)->name('dashboard');
 });
 
 Route::middleware('auth')->group(function () {

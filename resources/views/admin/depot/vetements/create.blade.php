@@ -5,6 +5,7 @@
 @section('content')
   @include('admin.depot.partials.styles')
   @include('admin.depot.partials.flash')
+  @include('admin.depot.partials.analyse')
 
   <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
     <div class="v-card-item">

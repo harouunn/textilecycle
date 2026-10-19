@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\Depot\Etat;
 use App\Enums\Depot\Genre;
+use App\Enums\Depot\Moderation;
 use App\Enums\Depot\StatutVetement;
 use App\Enums\Depot\Taille;
 use App\Models\Categorie;
@@ -49,5 +50,15 @@ class VetementFactory extends Factory
     public function statut(StatutVetement $statut): static
     {
         return $this->state(fn (array $attributes) => ['statut' => $statut]);
+    }
+
+    public function enAttente(): static
+    {
+        return $this->state(fn (array $attributes) => ['moderation' => Moderation::EnAttente]);
+    }
+
+    public function refuse(string $motif = 'La photo est floue.'): static
+    {
+        return $this->state(fn (array $attributes) => ['moderation' => Moderation::Refuse, 'motif_refus' => $motif]);
     }
 }

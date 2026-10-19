@@ -17,7 +17,7 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_client_lands_on_the_public_site_after_login(): void
     {
         $user = User::factory()->create();
 
@@ -27,7 +27,28 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('admin.dashboard', absolute: false));
+        $response->assertRedirect(route('home'));
+    }
+
+    public function test_admin_lands_on_the_back_office_after_login(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->post('/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function test_client_cannot_open_any_back_office_page(): void
+    {
+        $client = User::factory()->create();
+
+        foreach (['/admin', '/admin/depot/vetements', '/admin/users', '/admin/dons/dons', '/admin/ateliers', '/admin/upcycling/projets'] as $url) {
+            $this->actingAs($client)->get($url)->assertForbidden();
+        }
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void

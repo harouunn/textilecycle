@@ -3,25 +3,34 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Services\Auth\VerificationEmail;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class VerifyEmailController extends Controller
 {
     /**
-     * Mark the authenticated user's email address as verified.
+     * Vérifie le code à 6 chiffres saisi par l'utilisateur.
      */
-    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    public function __invoke(Request $request, VerificationEmail $verification): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('admin.dashboard', absolute: false).'?verified=1');
+        $user = $request->user();
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->intended($user->accueil());
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
+        $request->validate(['code' => ['required', 'string']], ['code.required' => 'Saisissez le code à 6 chiffres reçu par e-mail.']);
+
+        $resultat = $verification->verifier($user, $request->input('code'));
+        if ($resultat !== 'ok') {
+            throw ValidationException::withMessages(['code' => match ($resultat) {
+                'expire' => 'Ce code a expiré : demandez-en un nouveau.',
+                'bloque' => 'Trop d\'essais : demandez un nouveau code.',
+                default => 'Code incorrect. Vérifiez l\'e-mail reçu et réessayez.',
+            }]);
         }
 
-        return redirect()->intended(route('admin.dashboard', absolute: false).'?verified=1');
+        return redirect()->intended($user->accueil())->with('status', 'Adresse e-mail confirmée. Bienvenue sur TexTileCycle !');
     }
 }

@@ -3,16 +3,15 @@
 @section('title', 'Associations partenaires')
 
 @section('content')
-<section class="bg-light py-5">
-  <div class="container">
-    <div class="row justify-content-center text-center">
-      <div class="col-lg-8">
-        <h1 class="section-title mt-3">Donnez à une association</h1>
-        <p class="mb-0">Choisissez une association partenaire, découvrez ses besoins et proposez-lui vos vêtements en bon état.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<div class="tc-page">
+  <x-ui.hero surtitre="Associations & dons" titre="Donnez à une association"
+    sous-titre="Choisissez une association partenaire, découvrez ses besoins et proposez-lui vos vêtements en bon état."
+    :fil="['Accueil' => route('home'), 'Dons' => null]">
+    @auth
+      <a href="{{ route('dons.mes-dons') }}" class="tc-btn tc-btn--clair">Mes dons</a>
+    @endauth
+  </x-ui.hero>
+</div>
 
 <section class="py-5">
   <div class="container">

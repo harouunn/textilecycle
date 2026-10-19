@@ -28,7 +28,7 @@ class VetementControllerTest extends TestCase
     {
         Vetement::factory()->for(Categorie::factory()->create(['nom' => 'Manteaux']))->create(['titre' => 'Caban marine']);
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.depot.vetements.index'));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.depot.vetements.index'));
 
         $response->assertSeeTextInOrder(['Caban marine', 'Manteaux']);
     }
@@ -54,7 +54,7 @@ class VetementControllerTest extends TestCase
         Vetement::factory()->create(['titre' => 'Chemise en lin', 'etat' => Etat::Bon, 'statut' => StatutVetement::Disponible]);
         Vetement::factory()->create(['titre' => 'Pull en laine', 'etat' => Etat::AReparer, 'statut' => StatutVetement::Donne]);
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.depot.vetements.index', $filtre));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.depot.vetements.index', $filtre));
 
         $response->assertSeeText($attendu);
         $response->assertDontSeeText($exclu);
@@ -66,7 +66,7 @@ class VetementControllerTest extends TestCase
         Vetement::factory()->for($robes)->create(['titre' => 'Robe fleurie']);
         Vetement::factory()->create(['titre' => 'Jean brut']);
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.depot.vetements.index', ['categorie' => $robes->id]));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.depot.vetements.index', ['categorie' => $robes->id]));
 
         $response->assertSeeText('Robe fleurie');
         $response->assertDontSeeText('Jean brut');
@@ -77,7 +77,7 @@ class VetementControllerTest extends TestCase
         Storage::fake('public');
         $deposant = User::factory()->create();
 
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.depot.vetements.store'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.depot.vetements.store'), [
             ...$this->payload(),
             'user_id' => $deposant->id,
             'statut' => 'reserve',
@@ -95,7 +95,7 @@ class VetementControllerTest extends TestCase
 
     public function test_missing_fields_are_rejected_with_french_messages(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.depot.vetements.store'), []);
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.depot.vetements.store'), []);
 
         $response->assertSessionHasErrors([
             'titre' => 'Le champ titre est obligatoire.',
@@ -108,7 +108,7 @@ class VetementControllerTest extends TestCase
 
     public function test_future_deposit_date_is_rejected(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.depot.vetements.store'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.depot.vetements.store'), [
             ...$this->payload(),
             'date_depot' => now()->addDay()->format('Y-m-d'),
         ]);
@@ -120,7 +120,7 @@ class VetementControllerTest extends TestCase
     public function test_photo_with_unsupported_format_or_too_large_is_rejected(): void
     {
         Storage::fake('public');
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $this->actingAs($user)
             ->post(route('admin.depot.vetements.store'), [...$this->payload(), 'photo' => UploadedFile::fake()->create('photo.gif', 100, 'image/gif')])
@@ -137,7 +137,7 @@ class VetementControllerTest extends TestCase
         $anciennePhoto = UploadedFile::fake()->create('avant.jpg', 100, 'image/jpeg')->store('vetements', 'public');
         $vetement = Vetement::factory()->create(['photo' => $anciennePhoto]);
 
-        $response = $this->actingAs(User::factory()->create())->put(route('admin.depot.vetements.update', $vetement), [
+        $response = $this->actingAs(User::factory()->admin()->create())->put(route('admin.depot.vetements.update', $vetement), [
             ...$this->payload(),
             'user_id' => $vetement->user_id,
             'statut' => 'recycle',
@@ -158,7 +158,7 @@ class VetementControllerTest extends TestCase
         $photo = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg')->store('vetements', 'public');
         $vetement = Vetement::factory()->create(['photo' => $photo]);
 
-        $this->actingAs(User::factory()->create())->put(route('admin.depot.vetements.update', $vetement), [
+        $this->actingAs(User::factory()->admin()->create())->put(route('admin.depot.vetements.update', $vetement), [
             ...$this->payload(),
             'user_id' => $vetement->user_id,
             'statut' => 'disponible',
@@ -174,7 +174,7 @@ class VetementControllerTest extends TestCase
         $photo = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg')->store('vetements', 'public');
         $vetement = Vetement::factory()->create(['photo' => $photo]);
 
-        $response = $this->actingAs(User::factory()->create())->delete(route('admin.depot.vetements.destroy', $vetement));
+        $response = $this->actingAs(User::factory()->admin()->create())->delete(route('admin.depot.vetements.destroy', $vetement));
 
         $response->assertRedirect(route('admin.depot.vetements.index'));
         $this->assertModelMissing($vetement);

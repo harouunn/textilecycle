@@ -3,4 +3,5 @@
 <li><a href="{{ route('depot.mes-depots.create') }}" class="dropdown-item item-anchor">Déposer un vêtement</a></li>
 @auth
   <li><a href="{{ route('depot.mes-depots.index') }}" class="dropdown-item item-anchor">Mes dépôts</a></li>
+  <li><a href="{{ route('depot.reservations.index') }}" class="dropdown-item item-anchor">Mes réservations</a></li>
 @endauth

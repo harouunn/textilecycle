@@ -87,15 +87,29 @@
 
   <div class="v-col-12">
     <label for="photo" class="tc-label">Photo (JPG, PNG ou WEBP, 2 Mo max.)</label>
+    @php($photoAnalysee = ! $vetement->exists ? session(\App\Models\Vetement::SESSION_PHOTO_ANALYSEE) : null)
     <div class="d-flex align-center gap-4">
       @if ($vetement->photo)
         <img src="{{ $vetement->photo_url }}" alt="Photo actuelle" class="tc-thumb" style="width: 64px; height: 64px;">
+      @elseif ($photoAnalysee)
+        <img src="{{ asset('storage/'.$photoAnalysee) }}" alt="Photo analysée" class="tc-thumb" style="width: 64px; height: 64px;">
       @endif
       <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
         @class(['tc-control', 'is-invalid' => $errors->has('photo')])>
+      @unless ($vetement->exists)
+        <button type="submit" formaction="{{ route('admin.depot.vetements.analyser') }}" formnovalidate
+          class="v-btn v-theme--light text-primary v-btn--density-default v-btn--size-default v-btn--variant-tonal" style="flex-shrink: 0;">
+          <span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
+          <span class="v-btn__content"><i class="bx-scan v-icon notranslate v-theme--light me-1" aria-hidden="true" style="font-size: 20px; height: 20px; width: 20px;"></i> Analyser la photo</span>
+        </button>
+      @endunless
     </div>
     @if ($vetement->photo)
       <div class="text-body-2 text-disabled mt-1">Laissez vide pour conserver la photo actuelle.</div>
+    @elseif ($photoAnalysee)
+      <div class="text-body-2 text-disabled mt-1">Photo analysée : elle sera utilisée si vous n'en choisissez pas une autre.</div>
+    @else
+      <div class="text-body-2 text-disabled mt-1">Saisissez le titre, choisissez la photo puis « Analyser » : catégorie, matière, état et description sont proposés.</div>
     @endif
     @error('photo')
       <div class="tc-error">{{ $message }}</div>

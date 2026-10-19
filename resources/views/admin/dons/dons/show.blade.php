@@ -33,6 +33,10 @@
         <dl class="tcd-dl">
           <dt>Association</dt>
           <dd><a href="{{ route('admin.dons.associations.show', $don->association) }}">{{ $don->association->nom }}</a> ({{ $don->association->ville }})</dd>
+          @if ($don->vetement)
+            <dt>Vêtement du catalogue</dt>
+            <dd><a href="{{ route('admin.depot.vetements.show', $don->vetement) }}">{{ $don->vetement->titre }}</a></dd>
+          @endif
           <dt>Donateur</dt>
           <dd>{{ $don->user->name }} — <a href="mailto:{{ $don->user->email }}">{{ $don->user->email }}</a></dd>
           <dt>Type d'article</dt><dd>{{ $don->typeLabel() }}</dd>
