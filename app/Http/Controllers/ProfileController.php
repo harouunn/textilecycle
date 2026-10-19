@@ -28,11 +28,17 @@ class ProfileController extends Controller
     {
         $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
+        $emailModifie = $request->user()->isDirty('email');
+        if ($emailModifie) {
             $request->user()->email_verified_at = null;
         }
 
         $request->user()->save();
+
+        // Nouvelle adresse : elle doit être confirmée avec un nouveau code.
+        if ($emailModifie) {
+            $request->user()->sendEmailVerificationNotification();
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

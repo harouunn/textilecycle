@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['association_id', 'user_id', 'type_article', 'quantite', 'poids_kg', 'etat_general', 'mode_remise', 'date_remise', 'adresse_collecte', 'statut', 'message'])]
+#[Fillable(['vetement_id', 'association_id', 'user_id', 'type_article', 'quantite', 'poids_kg', 'etat_general', 'mode_remise', 'date_remise', 'adresse_collecte', 'statut', 'message'])]
 class Don extends Model
 {
     /** @use HasFactory<DonFactory> */
@@ -72,6 +72,14 @@ class Don extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Vêtement du catalogue (module Dépôt) donné à l'association, s'il y en a un.
+     */
+    public function vetement(): BelongsTo
+    {
+        return $this->belongsTo(Vetement::class);
     }
 
     public function typeLabel(): string

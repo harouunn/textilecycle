@@ -29,7 +29,7 @@ class DemandeReparationControllerTest extends TestCase
             ->for(User::factory()->create(['name' => 'Sami Ben Ali']))
             ->create(['titre' => 'Manteau décousu']);
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.ateliers.demandes.index'));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.ateliers.demandes.index'));
 
         $response->assertOk();
         $response->assertSeeTextInOrder(['Manteau décousu', 'Fil d\'Or', 'Sami Ben Ali', $demande->cout_affiche]);
@@ -55,7 +55,7 @@ class DemandeReparationControllerTest extends TestCase
         DemandeReparation::factory()->statut(StatutDemande::EnAttente)->create(['titre' => 'Chemise sans bouton']);
 
         $valeur = ['search' => 'Robe', 'statut' => 'refusee', 'atelier' => $atelier->id][$filtre];
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.ateliers.demandes.index', [$filtre => $valeur]));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.ateliers.demandes.index', [$filtre => $valeur]));
 
         $response->assertSeeText('Robe déchirée');
         $response->assertDontSeeText('Chemise sans bouton');
@@ -63,7 +63,7 @@ class DemandeReparationControllerTest extends TestCase
 
     public function test_create_and_edit_forms_are_displayed(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->admin()->create();
         $demande = DemandeReparation::factory()->create(['titre' => 'Manteau décousu']);
 
         $this->actingAs($admin)->get(route('admin.ateliers.demandes.create'))
@@ -79,7 +79,7 @@ class DemandeReparationControllerTest extends TestCase
         $atelier = Atelier::factory()->create();
         $client = User::factory()->create();
 
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.ateliers.demandes.store'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.ateliers.demandes.store'), [
             'atelier_id' => $atelier->id,
             'user_id' => $client->id,
             'titre' => 'Robe trop longue',
@@ -96,7 +96,7 @@ class DemandeReparationControllerTest extends TestCase
 
     public function test_admin_create_requires_workshop_and_client(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.ateliers.demandes.store'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.ateliers.demandes.store'), [
             'titre' => 'Robe trop longue',
             'type_vetement' => 'robe_jupe',
             'description' => 'Ourlet.',
@@ -112,7 +112,7 @@ class DemandeReparationControllerTest extends TestCase
     {
         $demande = DemandeReparation::factory()->create(['description' => 'La fermeture éclair est bloquée.']);
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.ateliers.demandes.show', $demande));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.ateliers.demandes.show', $demande));
 
         $response->assertOk();
         $response->assertSeeText('Réparation(s) identifiée(s) : fermeture éclair.');
@@ -125,7 +125,7 @@ class DemandeReparationControllerTest extends TestCase
         $photo = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg')->store('reparations', 'public');
         $demande = DemandeReparation::factory()->create(['description' => 'Il manque un bouton.', 'photo' => $photo]);
 
-        $response = $this->actingAs(User::factory()->create())->put(route('admin.ateliers.demandes.update', $demande), [
+        $response = $this->actingAs(User::factory()->admin()->create())->put(route('admin.ateliers.demandes.update', $demande), [
             'atelier_id' => $demande->atelier_id,
             'user_id' => $demande->user_id,
             'titre' => $demande->titre,
@@ -144,7 +144,7 @@ class DemandeReparationControllerTest extends TestCase
     {
         $demande = DemandeReparation::factory()->create();
 
-        $response = $this->actingAs(User::factory()->create())->patch(route('admin.ateliers.demandes.traiter', $demande), [
+        $response = $this->actingAs(User::factory()->admin()->create())->patch(route('admin.ateliers.demandes.traiter', $demande), [
             'statut' => 'acceptee',
             'cout_final' => '27.50',
             'date_prevue' => '2026-10-20',
@@ -164,7 +164,7 @@ class DemandeReparationControllerTest extends TestCase
     {
         $demande = DemandeReparation::factory()->create();
 
-        $response = $this->actingAs(User::factory()->create())->patch(route('admin.ateliers.demandes.traiter', $demande), [
+        $response = $this->actingAs(User::factory()->admin()->create())->patch(route('admin.ateliers.demandes.traiter', $demande), [
             'statut' => 'refusee',
             'cout_final' => '-3',
         ]);
@@ -180,7 +180,7 @@ class DemandeReparationControllerTest extends TestCase
     {
         $demande = DemandeReparation::factory()->create();
 
-        $response = $this->actingAs(User::factory()->create())->delete(route('admin.ateliers.demandes.destroy', $demande));
+        $response = $this->actingAs(User::factory()->admin()->create())->delete(route('admin.ateliers.demandes.destroy', $demande));
 
         $response->assertRedirect(route('admin.ateliers.demandes.index'));
         $this->assertModelMissing($demande);
@@ -190,7 +190,7 @@ class DemandeReparationControllerTest extends TestCase
     {
         $demande = DemandeReparation::factory()->create();
 
-        $this->actingAs(User::factory()->create())->delete(route('admin.ateliers.destroy', $demande->atelier));
+        $this->actingAs(User::factory()->admin()->create())->delete(route('admin.ateliers.destroy', $demande->atelier));
 
         $this->assertModelMissing($demande);
     }

@@ -24,7 +24,7 @@ Route::prefix('dons')->name('dons.')->group(function () {
     Route::get('/', [AssociationController::class, 'index'])->name('index');
     Route::get('/associations/{association}', [AssociationController::class, 'show'])->name('associations.show');
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/associations/{association}/faire-un-don', [DonController::class, 'create'])->name('create');
         Route::post('/associations/{association}/faire-un-don', [DonController::class, 'store'])->name('store');
         Route::get('/mes-dons', [DonController::class, 'index'])->name('mes-dons');

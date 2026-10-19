@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 // Front office
 Route::prefix('ateliers')->name('ateliers.')->group(function () {
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('mes-demandes', [DemandeReparationController::class, 'index'])->name('demandes.index');
         Route::delete('mes-demandes/{demande}', [DemandeReparationController::class, 'destroy'])->whereNumber('demande')->name('demandes.destroy');
         Route::get('{atelier}/demander', [DemandeReparationController::class, 'create'])->whereNumber('atelier')->name('demandes.create');

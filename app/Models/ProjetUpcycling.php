@@ -20,6 +20,7 @@ class ProjetUpcycling extends Model
     protected $table = 'projets_upcycling';
 
     protected $fillable = [
+        'vetement_id',
         'user_id',
         'titre',
         'description',
@@ -62,6 +63,14 @@ class ProjetUpcycling extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Vêtement du catalogue (module Dépôt) transformé par ce projet, s'il y en a un.
+     */
+    public function vetement(): BelongsTo
+    {
+        return $this->belongsTo(Vetement::class);
     }
 
     public function etapes(): HasMany

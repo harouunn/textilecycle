@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\Auth\VerificationEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -10,12 +11,16 @@ use Illuminate\View\View;
 class EmailVerificationPromptController extends Controller
 {
     /**
-     * Display the email verification prompt.
+     * Page « Vérifiez votre e-mail » : saisie du code à 6 chiffres reçu par e-mail.
      */
-    public function __invoke(Request $request): RedirectResponse|View
+    public function __invoke(Request $request, VerificationEmail $verification): RedirectResponse|View
     {
-        return $request->user()->hasVerifiedEmail()
-                    ? redirect()->intended(route('admin.dashboard', absolute: false))
-                    : view('auth.verify-email');
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->intended($request->user()->accueil());
+        }
+
+        return view('auth.verify-email', [
+            'codeDev' => $verification->modeDeveloppement() ? session(VerificationEmail::SESSION_CODE_DEV) : null,
+        ]);
     }
 }

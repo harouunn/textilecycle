@@ -1,6 +1,7 @@
 {{-- Module « Dépôt & vêtements » : entrées du menu back office (à modifier uniquement par l'équipe du module) --}}
 @php
   $depotsEnAttente = \App\Models\Vetement::query()->where('moderation', \App\Enums\Depot\Moderation::EnAttente)->count();
+  $reservationsEnAttente = \App\Models\Reservation::query()->where('statut', \App\Enums\Depot\StatutReservation::EnAttente)->count();
   $pageAValider = request()->routeIs('admin.depot.vetements.index') && request('moderation') === \App\Enums\Depot\Moderation::EnAttente->value;
 @endphp
 @include('partials.back.nav-link', [
@@ -15,6 +16,13 @@
   'href' => route('admin.depot.vetements.index', ['moderation' => \App\Enums\Depot\Moderation::EnAttente->value]),
   'active' => $pageAValider,
   'badge' => $depotsEnAttente ?: null,
+])
+@include('partials.back.nav-link', [
+  'title' => 'Réservations',
+  'icon' => 'bx-calendar-check',
+  'href' => route('admin.depot.reservations.index'),
+  'active' => request()->routeIs('admin.depot.reservations.*'),
+  'badge' => $reservationsEnAttente ?: null,
 ])
 @include('partials.back.nav-link', [
   'title' => 'Catégories',

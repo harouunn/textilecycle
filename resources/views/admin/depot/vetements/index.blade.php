@@ -1,23 +1,42 @@
 @extends('layouts.back')
 
-@php($aValider = ($filters['moderation'] ?? null) === \App\Enums\Depot\Moderation::EnAttente->value)
-
-@section('title', $aValider ? 'Dépôts à valider' : 'Vêtements')
+@section('title', ($filters['moderation'] ?? null) === 'en_attente' ? 'Dépôts à valider' : 'Vêtements')
 
 @section('content')
   @include('admin.depot.partials.styles')
   @include('admin.depot.partials.flash')
 
+  @php
+    $aValider = ($filters['moderation'] ?? null) === \App\Enums\Depot\Moderation::EnAttente->value;
+    $sansFiltre = ! array_filter($filters);
+    $lien = fn (array $filtre) => route('admin.depot.vetements.index', $filtre);
+  @endphp
+
+  <div class="tc-page-head">
+    <div>
+      <h4 class="text-h4">{{ $aValider ? 'Dépôts à valider' : 'Dépôt & vêtements' }}</h4>
+      <p>{{ $aValider ? 'Approuvez les dépôts des clients pour les publier dans le catalogue.' : 'Tous les vêtements déposés, leur statut et leur validation.' }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-3">
+      @include('admin.depot.partials.btn', ['label' => 'Exporter (Excel)', 'icon' => 'bx-download', 'variant' => 'tonal', 'color' => 'secondary', 'href' => route('admin.depot.export.vetements', array_filter($filters))])
+      @include('admin.depot.partials.btn', ['label' => 'Ajouter un vêtement', 'icon' => 'bx-plus', 'href' => route('admin.depot.vetements.create')])
+    </div>
+  </div>
+
+  @include('admin.depot.partials.kpis', ['kpis' => [
+      ['Vêtements au total', $stats['total'], 'bx-package', 'primary', $lien([]), $sansFiltre],
+      ['À valider', $stats['a_valider'], 'bx-check-shield', 'warning', $lien(['moderation' => 'en_attente']), $aValider],
+      ['En ligne', $stats['en_ligne'], 'bx-store', 'success', $lien(['moderation' => 'approuve', 'statut' => 'disponible']), ($filters['moderation'] ?? null) === 'approuve' && ($filters['statut'] ?? null) === 'disponible'],
+      ['Réservés', $stats['reserves'], 'bx-calendar-check', 'info', $lien(['statut' => 'reserve']), ($filters['statut'] ?? null) === 'reserve' && empty($filters['moderation'])],
+      ['Donnés', $stats['donnes'], 'bx-gift', 'secondary', $lien(['statut' => 'donne']), ($filters['statut'] ?? null) === 'donne' && empty($filters['moderation'])],
+  ]])
+
   <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
     <div class="v-card-item">
       <div class="v-card-item__content">
-        <div class="v-card-title">{{ $aValider ? 'Dépôts à valider' : 'Dépôt & vêtements' }}</div>
-        <div class="v-card-subtitle">
-          {{ $aValider ? $vetements->total().' dépôt(s) de clients en attente : approuvez-les pour les publier dans le catalogue.' : $vetements->total().' vêtement(s)' }}
+        <div class="v-card-title">
+          {{ $aValider ? $vetements->total().' dépôt(s) de clients en attente' : $vetements->total().' vêtement(s)' }}
         </div>
-      </div>
-      <div class="v-card-item__append">
-        @include('admin.depot.partials.btn', ['label' => 'Ajouter un vêtement', 'icon' => 'bx-plus', 'href' => route('admin.depot.vetements.create')])
       </div>
     </div>
 
@@ -95,10 +114,10 @@
               <tr>
                 <td>
                   <div class="d-flex align-center gap-3">
-                    <img src="{{ $vetement->photo_url }}" alt="" class="tc-thumb">
+                    <img src="{{ $vetement->miniature_url }}" alt="" class="tc-thumb" loading="lazy" width="48" height="48">
                     <div>
                       <a href="{{ route('admin.depot.vetements.show', $vetement) }}" class="font-weight-medium text-high-emphasis">{{ $vetement->titre }}</a>
-                      <div class="text-body-2 text-disabled">{{ $vetement->genre->label() }} · {{ $vetement->matiere }}</div>
+                      <div class="text-body-2 text-disabled">{{ $vetement->genre->label() }} · {{ $vetement->matiere }} · par {{ $vetement->user->name }}</div>
                     </div>
                   </div>
                 </td>

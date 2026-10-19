@@ -20,7 +20,7 @@ class AtelierControllerTest extends TestCase
     {
         Atelier::factory()->create(['nom' => 'Fil d\'Or']);
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.ateliers.index'));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.ateliers.index'));
 
         $response->assertOk();
         $response->assertSeeText('Fil d\'Or');
@@ -28,7 +28,7 @@ class AtelierControllerTest extends TestCase
 
     public function test_admin_creates_a_workshop(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.ateliers.store'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.ateliers.store'), [
             ...$this->payload(),
             'actif' => '1',
         ]);
@@ -42,14 +42,14 @@ class AtelierControllerTest extends TestCase
         $atelier = Atelier::factory()->create(['actif' => true]);
 
         // Une case décochée n'est pas envoyée par le navigateur : « actif » est absent.
-        $this->actingAs(User::factory()->create())->put(route('admin.ateliers.update', $atelier), $this->payload());
+        $this->actingAs(User::factory()->admin()->create())->put(route('admin.ateliers.update', $atelier), $this->payload());
 
         $this->assertFalse($atelier->fresh()->actif);
     }
 
     public function test_create_requires_name_address_city_and_postcode(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.ateliers.store'), []);
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.ateliers.store'), []);
 
         $response->assertSessionHasErrors(['nom', 'adresse', 'ville', 'code_postal']);
         $this->assertDatabaseCount('ateliers', 0);

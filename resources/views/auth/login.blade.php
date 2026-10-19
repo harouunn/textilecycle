@@ -3,54 +3,44 @@
 @section('title', 'Connexion')
 
 @section('content')
-  <section class="bg-light py-5">
-    <div class="container py-md-5">
-      <div class="tc-auth-card p-4 p-md-5">
-        <h2 class="section-title text-center mb-2">Connexion</h2>
-        <p class="text-center mb-4">Heureux de vous revoir sur TexTileCycle.</p>
+  <x-ui.auth surtitre="Bon retour" titre="Connexion" sous-titre="Connectez-vous pour déposer, réserver et suivre vos vêtements."
+    image="banner-image-2.jpg" accroche="Chaque vêtement mérite une seconde vie.">
+    <form method="POST" action="{{ route('login') }}" class="tc-form" novalidate>
+      @csrf
 
-        @if (session('status'))
-          <div class="alert alert-success">{{ session('status') }}</div>
-        @endif
+      <div class="mb-3">
+        <label for="email" class="form-label">Adresse e-mail</label>
+        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="vous@exemple.com"
+          @class(['form-control', 'is-invalid' => $errors->has('email')])>
+        @error('email')
+          <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+      </div>
 
-        <form method="POST" action="{{ route('login') }}">
-          @csrf
+      <x-ui.mot-de-passe id="password" label="Mot de passe" autocomplete="current-password" required />
 
-          <div class="mb-3">
-            <label for="email" class="form-label">Adresse e-mail</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
-              @class(['form-control form-control-lg', 'is-invalid' => $errors->has('email')])>
-            @error('email')
-              <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-          </div>
+      <x-ui.captcha />
 
-          <div class="mb-3">
-            <label for="password" class="form-label">Mot de passe</label>
-            <input id="password" type="password" name="password" required autocomplete="current-password"
-              @class(['form-control form-control-lg', 'is-invalid' => $errors->has('password')])>
-            @error('password')
-              <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center gap-2">
-              <input id="remember_me" type="checkbox" name="remember" class="form-check-input m-0">
-              <label for="remember_me" class="form-check-label">Se souvenir de moi</label>
-            </div>
-            @if (Route::has('password.request'))
-              <a href="{{ route('password.request') }}" class="item-anchor">Mot de passe oublié ?</a>
-            @endif
-          </div>
-
-          <button type="submit" class="btn btn-dark btn-lg text-uppercase w-100">Se connecter</button>
-        </form>
-
-        @if (Route::has('register'))
-          <p class="text-center mt-4 mb-0">Pas encore de compte ? <a href="{{ route('register') }}" class="item-anchor">Inscrivez-vous</a></p>
+      <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <label class="tc-check mb-0">
+          <input id="remember_me" type="checkbox" name="remember"> Se souvenir de moi
+        </label>
+        @if (Route::has('password.request'))
+          <a href="{{ route('password.request') }}" class="tc-lien small">Mot de passe oublié ?</a>
         @endif
       </div>
-    </div>
-  </section>
+
+      <button type="submit" class="tc-btn tc-btn--bloc">Se connecter</button>
+    </form>
+
+    <div class="tc-separateur">Sécurité</div>
+    <p class="small d-flex gap-2 mb-0">
+      <x-ui.icone nom="bouclier" style="width: 20px; height: 20px; color: var(--tc-vert); flex-shrink: 0;" />
+      Si vous avez activé la double authentification, votre application vous demandera ensuite un code à 6 chiffres.
+    </p>
+
+    @if (Route::has('register'))
+      <p class="tc-auth__bas">Pas encore de compte ? <a href="{{ route('register') }}">Créer un compte</a></p>
+    @endif
+  </x-ui.auth>
 @endsection

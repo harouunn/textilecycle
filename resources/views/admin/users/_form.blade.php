@@ -15,10 +15,20 @@
             <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" @class(['tcd-input', 'is-invalid' => $errors->has('name')]) required autocomplete="off">
             @error('name') <div class="tcd-error">{{ $message }}</div> @enderror
           </div>
-          <div class="tcd-field mb-0">
+          <div class="tcd-field">
             <label for="email" class="tcd-label">E-mail <span class="tcd-required">*</span></label>
             <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" @class(['tcd-input', 'is-invalid' => $errors->has('email')]) required autocomplete="off">
             @error('email') <div class="tcd-error">{{ $message }}</div> @enderror
+          </div>
+          <div class="tcd-field mb-0">
+            <label for="role" class="tcd-label">Rôle <span class="tcd-required">*</span></label>
+            <select id="role" name="role" @class(['tcd-input', 'is-invalid' => $errors->has('role')]) required>
+              @foreach (\App\Enums\Role::options() as $value => $label)
+                <option value="{{ $value }}" @selected(old('role', $user->role?->value ?? 'client') === $value)>{{ $label }}</option>
+              @endforeach
+            </select>
+            <div class="tcd-hint">Seuls les administrateurs accèdent au back office.</div>
+            @error('role') <div class="tcd-error">{{ $message }}</div> @enderror
           </div>
         </div>
         <span class="v-card__underlay"></span>

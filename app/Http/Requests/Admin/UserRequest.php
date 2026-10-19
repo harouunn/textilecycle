@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -24,6 +25,16 @@ class UserRequest extends FormRequest
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'password' => [$creating ? 'required' : 'nullable', 'confirmed', Password::min(8)],
+            'role' => [
+                'required',
+                Rule::enum(Role::class),
+                // Un administrateur ne peut pas se retirer lui-même ses droits (il perdrait l'accès au back office).
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if ($this->route('user')?->is($this->user()) && $value !== Role::Admin->value) {
+                        $fail('Vous ne pouvez pas retirer vos propres droits d\'administrateur.');
+                    }
+                },
+            ],
         ];
     }
 
@@ -41,6 +52,8 @@ class UserRequest extends FormRequest
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
             'password.min' => 'Le mot de passe doit contenir au moins :min caractères.',
+            'role.required' => 'Le rôle est obligatoire.',
+            'role.Illuminate\Validation\Rules\Enum' => 'Le rôle choisi est invalide.',
         ];
     }
 

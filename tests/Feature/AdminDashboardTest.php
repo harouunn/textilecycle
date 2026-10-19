@@ -19,7 +19,7 @@ class AdminDashboardTest extends TestCase
 
     public function test_authenticated_user_sees_the_dashboard(): void
     {
-        $user = User::factory()->create(['name' => 'Amina Trabelsi']);
+        $user = User::factory()->admin()->create(['name' => 'Amina Trabelsi']);
 
         $response = $this->actingAs($user)->get('/admin');
 

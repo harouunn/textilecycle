@@ -30,6 +30,7 @@ class DemandeReparation extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'vetement_id',
         'atelier_id',
         'user_id',
         'titre',
@@ -83,6 +84,16 @@ class DemandeReparation extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Vêtement du catalogue (module Dépôt) envoyé en réparation, s'il y en a un.
+     *
+     * @return BelongsTo<Vetement, $this>
+     */
+    public function vetement(): BelongsTo
+    {
+        return $this->belongsTo(Vetement::class);
     }
 
     /**

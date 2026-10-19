@@ -25,10 +25,25 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
+        $user = $request->user();
+
+        // Compte protégé par la double authentification : le mot de passe ne suffit pas,
+        // on le déconnecte et on demande le code de son application.
+        if ($user->aDoubleAuthentification()) {
+            Auth::guard('web')->logout();
+            $request->session()->regenerate();
+            $request->session()->put([
+                DefiDeuxFacteursController::SESSION_ID => $user->id,
+                DefiDeuxFacteursController::SESSION_SOUVENIR => $request->boolean('remember'),
+            ]);
+
+            return redirect()->route('deux-facteurs.create');
+        }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard', absolute: false));
+        // Un admin arrive sur le back office, un client sur le site public.
+        return redirect()->intended($user->accueil());
     }
 
     /**

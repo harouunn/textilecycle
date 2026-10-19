@@ -5,10 +5,10 @@
 @section('content')
 @php
   $stats = [
-    ['label' => 'Vêtements déposés', 'value' => 0, 'icon' => 'bx-package', 'color' => 'primary'],
-    ['label' => 'Réparations en cours', 'value' => 0, 'icon' => 'bx-wrench', 'color' => 'warning'],
-    ['label' => 'Pièces upcyclées', 'value' => 0, 'icon' => 'bx-palette', 'color' => 'info'],
-    ['label' => 'Dons aux associations', 'value' => 0, 'icon' => 'bx-donate-heart', 'color' => 'success'],
+    ['label' => 'Vêtements déposés', 'value' => $totaux['vetements'], 'icon' => 'bx-package', 'color' => 'primary'],
+    ['label' => 'Réparations en cours', 'value' => $totaux['reparations'], 'icon' => 'bx-wrench', 'color' => 'warning'],
+    ['label' => 'Projets d\'upcycling', 'value' => $totaux['upcycling'], 'icon' => 'bx-palette', 'color' => 'info'],
+    ['label' => 'Dons aux associations', 'value' => $totaux['dons'], 'icon' => 'bx-donate-heart', 'color' => 'success'],
   ];
 
   $steps = [
@@ -61,11 +61,12 @@
             <span class="v-avatar__underlay"></span>
           </div>
           <div>
-            <h4 class="text-h4">0 kg</h4>
-            <p class="mb-0 text-body-2">de textiles détournés des déchets</p>
+            <h4 class="text-h4">{{ $impact['vetements'] }} vêtement(s)</h4>
+            <p class="mb-0 text-body-2">ont trouvé une seconde vie (donnés ou recyclés)</p>
           </div>
         </div>
-        <p class="mt-4 mb-0 text-body-2 text-disabled">Les indicateurs seront calculés automatiquement dès l'enregistrement des premiers dépôts.</p>
+        <p class="mt-4 mb-1 text-body-2"><strong>{{ \App\Services\Depot\ImpactEcologique::formaterEau($impact['eau']) }}</strong> d'eau économisés</p>
+        <p class="mb-0 text-body-2"><strong>{{ number_format($impact['co2'], 0, ',', ' ') }} kg</strong> de CO₂ évités</p>
       </div>
       <span class="v-card__underlay"></span>
     </div>
@@ -89,6 +90,37 @@
       </div>
     </div>
   @endforeach
+
+  {{-- À traiter --}}
+  <div class="v-col-12">
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+      <div class="v-card-item">
+        <div class="v-card-item__content">
+          <div class="v-card-title">À traiter</div>
+          <div class="v-card-subtitle">Ce qui attend une action de l'équipe, toutes gestions confondues</div>
+        </div>
+      </div>
+      <div class="v-card-text">
+        <div class="v-row">
+          @foreach ($aTraiter as [$libelle, $nombre, $icone, $couleur, $lien])
+            <div class="v-col-sm-6 v-col-md-3 v-col-12">
+              <a href="{{ $lien }}" class="d-flex align-center gap-3 text-decoration-none">
+                <div class="v-avatar v-theme--light text-{{ $couleur }} v-avatar--density-default v-avatar--variant-tonal rounded flex-shrink-0" style="width: 42px; height: 42px;">
+                  <i class="{{ $icone }} v-icon notranslate v-theme--light" aria-hidden="true" style="font-size: 22px; height: 22px; width: 22px;"></i>
+                  <span class="v-avatar__underlay"></span>
+                </div>
+                <div>
+                  <div class="text-h5 text-high-emphasis mb-0">{{ $nombre }}</div>
+                  <div class="text-body-2 text-medium-emphasis">{{ $libelle }}</div>
+                </div>
+              </a>
+            </div>
+          @endforeach
+        </div>
+      </div>
+      <span class="v-card__underlay"></span>
+    </div>
+  </div>
 
   {{-- Le cycle --}}
   <div class="v-col-12">

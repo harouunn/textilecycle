@@ -114,4 +114,15 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | CAPTCHA (anti-robot) à l'inscription et à la connexion
+    |--------------------------------------------------------------------------
+    |
+    | Désactivé dans les tests automatiques (phpunit.xml), sauf dans les tests dédiés au CAPTCHA.
+    |
+    */
+
+    'captcha' => (bool) env('CAPTCHA_ACTIF', true),
+
 ];

@@ -3,21 +3,24 @@
 @section('title', 'Modifier mon dépôt')
 
 @section('content')
-  @include('depot.partials.styles')
 
-  <section class="bg-light py-5">
-    <div class="container py-md-4" style="max-width: 900px;">
-      <h1 class="section-title text-center mb-5">Modifier « {{ $vetement->titre }} »</h1>
+  <div class="tc-page">
+    <x-ui.hero
+      surtitre="Mes dépôts"
+      :titre="'Modifier « '.$vetement->titre.' »'"
+      sous-titre="Après modification, votre vêtement sera de nouveau vérifié par l'équipe avant sa publication."
+      :fil="['Mes dépôts' => route('depot.mes-depots.index'), 'Modifier' => null]" />
 
-      <div class="bg-white p-4 p-md-5">
+    <section class="py-5">
+      <div class="container" style="max-width: 960px;">
         @include('depot.partials.flash')
 
-        <form method="POST" action="{{ route('depot.mes-depots.update', $vetement) }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('depot.mes-depots.update', $vetement) }}" enctype="multipart/form-data" class="tc-carte tc-carte__corps p-md-5">
           @csrf
           @method('PUT')
           @include('depot.mes-depots._form', ['submitLabel' => 'Enregistrer'])
         </form>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 @endsection

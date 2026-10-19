@@ -49,6 +49,12 @@
                       <td>{{ $value }}</td>
                     </tr>
                   @endforeach
+                  @if ($demande->vetement)
+                    <tr>
+                      <th class="text-start">Vêtement du catalogue</th>
+                      <td><a href="{{ route('admin.depot.vetements.show', $demande->vetement) }}">{{ $demande->vetement->titre }}</a></td>
+                    </tr>
+                  @endif
                 </tbody>
               </table>
             </div>

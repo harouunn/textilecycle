@@ -12,9 +12,13 @@ use App\Http\Requests\Depot\AnalyserVetementRequest;
 use App\Http\Requests\Depot\RefuserVetementRequest;
 use App\Http\Requests\Depot\StoreVetementRequest;
 use App\Http\Requests\Depot\UpdateVetementRequest;
+use App\Models\Association;
+use App\Models\Atelier;
 use App\Models\Categorie;
 use App\Models\User;
 use App\Models\Vetement;
+use App\Services\Depot\DetecteurDoublons;
+use App\Services\Depot\StatistiquesDepot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -27,7 +31,7 @@ class VetementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request, StatistiquesDepot $statistiques): View
     {
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
@@ -38,7 +42,7 @@ class VetementController extends Controller
         ]);
 
         $vetements = Vetement::query()
-            ->with('categorie')
+            ->with(['categorie', 'user'])
             ->filter($filters)
             ->latest('date_depot')
             ->latest('id')
@@ -48,7 +52,8 @@ class VetementController extends Controller
         return view('admin.depot.vetements.index', [
             'vetements' => $vetements,
             'filters' => $filters,
-            'categories' => Categorie::query()->orderBy('nom')->pluck('nom', 'id'),
+            'categories' => Categorie::query()->orderBy('ordre')->orderBy('nom')->pluck('nom', 'id'),
+            'stats' => $statistiques->vetements(),
         ]);
     }
 
@@ -88,9 +93,21 @@ class VetementController extends Controller
      */
     public function show(Vetement $vetement): View
     {
-        $vetement->load(['categorie', 'user']);
+        $vetement->load([
+            'categorie',
+            'user',
+            'reservations' => fn ($query) => $query->with('user')->latest('id'),
+            'demandesReparation.atelier',
+            'projetsUpcycling',
+            'dons.association',
+        ]);
 
-        return view('admin.depot.vetements.show', compact('vetement'));
+        return view('admin.depot.vetements.show', [
+            'vetement' => $vetement,
+            'doublons' => app(DetecteurDoublons::class)->doublonsDe($vetement),
+            'ateliers' => Atelier::query()->actif()->orderBy('nom')->pluck('nom', 'id'),
+            'associations' => Association::query()->where('active', true)->orderBy('nom')->pluck('nom', 'id'),
+        ]);
     }
 
     /**
@@ -160,7 +177,7 @@ class VetementController extends Controller
     {
         return [
             'vetement' => $vetement,
-            'categories' => Categorie::query()->orderBy('nom')->pluck('nom', 'id'),
+            'categories' => Categorie::query()->orderBy('ordre')->orderBy('nom')->pluck('nom', 'id'),
             'users' => User::query()->orderBy('name')->pluck('name', 'id'),
         ];
     }

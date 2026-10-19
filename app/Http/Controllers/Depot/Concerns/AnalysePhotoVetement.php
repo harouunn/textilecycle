@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Depot\Concerns;
 use App\Http\Requests\Depot\AnalyserVetementRequest;
 use App\Models\Categorie;
 use App\Models\Vetement;
+use App\Services\Depot\ClassificateurIA;
 use App\Services\Depot\ClassificateurVetement;
+use App\Services\Depot\OptimiseurPhoto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,17 +21,17 @@ trait AnalysePhotoVetement
     protected function analyserPhoto(AnalyserVetementRequest $request, string $routeFormulaire): RedirectResponse
     {
         if ($ancienne = $request->session()->pull(Vetement::SESSION_PHOTO_ANALYSEE)) {
-            Storage::disk('public')->delete($ancienne);
+            Storage::disk('public')->delete([$ancienne, Vetement::cheminMiniature($ancienne)]);
         }
 
         $chemin = $request->file('photo')->store(Vetement::PHOTO_DIRECTORY, 'public');
+        app(OptimiseurPhoto::class)->optimiser($chemin);
         $request->session()->put(Vetement::SESSION_PHOTO_ANALYSEE, $chemin);
 
-        $classement = app(ClassificateurVetement::class)->classer(
-            Storage::disk('public')->path($chemin),
-            $request->validated('titre'),
-            Categorie::query()->orderBy('nom')->get(),
-        );
+        // L'IA Claude d'abord (si une clé est configurée), sinon l'analyse locale sans IA.
+        $categories = Categorie::query()->actives()->get();
+        $classement = app(ClassificateurIA::class)->classer(ClassificateurIA::imageAEnvoyer($chemin), $request->validated('titre'), $categories)
+            ?? app(ClassificateurVetement::class)->classer(Storage::disk('public')->path($chemin), $request->validated('titre'), $categories);
 
         $suggestions = array_filter([
             'categorie_id' => $classement['categorie_id'],

@@ -12,14 +12,20 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     * Deux comptes de démonstration (mot de passe : password) :
+     *  - test@example.com   : administrateur (back office /admin)
+     *  - client@example.com : client (site public)
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
+        User::factory()->admin()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Client Démo',
+            'email' => 'client@example.com',
         ]);
     }
 }

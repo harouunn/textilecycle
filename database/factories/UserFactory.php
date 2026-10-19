@@ -34,6 +34,14 @@ class UserFactory extends Factory
     }
 
     /**
+     * Compte administrateur (accès au back office /admin).
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'admin']);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

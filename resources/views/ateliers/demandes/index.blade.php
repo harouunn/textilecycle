@@ -5,13 +5,12 @@
 @section('content')
   @include('ateliers.partials.styles')
 
-  <section class="bg-light py-5">
-    <div class="container text-center py-md-4">
-      <h1 class="section-title">Mes demandes de réparation</h1>
-      <p class="mb-4">Suivez le diagnostic et l'avancement de vos réparations.</p>
-      <a href="{{ route('ateliers.index') }}" class="btn btn-dark text-uppercase">Choisir un atelier</a>
-    </div>
-  </section>
+  <div class="tc-page">
+    <x-ui.hero surtitre="Mon espace" titre="Mes demandes de réparation" sous-titre="Suivez le diagnostic et l'avancement de vos réparations."
+      :fil="['Ateliers' => route('ateliers.index'), 'Mes demandes' => null]">
+      <a href="{{ route('ateliers.index') }}" class="tc-btn">Choisir un atelier</a>
+    </x-ui.hero>
+  </div>
 
   <section class="py-5">
     <div class="container" style="max-width: 1000px;">

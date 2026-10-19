@@ -33,7 +33,22 @@ class MesDepotsController extends Controller
             ->latest('id')
             ->paginate(10);
 
-        return view('depot.mes-depots.index', compact('vetements'));
+        // Résumé en une requête : nombre de dépôts par état de validation.
+        $parModeration = Vetement::query()->toBase()
+            ->where('user_id', $request->user()->id)
+            ->selectRaw('moderation, count(*) as total')
+            ->groupBy('moderation')
+            ->pluck('total', 'moderation');
+
+        return view('depot.mes-depots.index', [
+            'vetements' => $vetements,
+            'resume' => [
+                'total' => (int) $parModeration->sum(),
+                'en_attente' => (int) ($parModeration[Moderation::EnAttente->value] ?? 0),
+                'approuve' => (int) ($parModeration[Moderation::Approuve->value] ?? 0),
+                'refuse' => (int) ($parModeration[Moderation::Refuse->value] ?? 0),
+            ],
+        ]);
     }
 
     public function create(): View
@@ -106,6 +121,6 @@ class MesDepotsController extends Controller
      */
     private function categories(): Collection
     {
-        return Categorie::query()->orderBy('nom')->pluck('nom', 'id');
+        return Categorie::query()->actives()->pluck('nom', 'id');
     }
 }

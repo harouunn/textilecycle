@@ -32,7 +32,7 @@ class ModerationTest extends TestCase
         $vetement = Vetement::factory()->for($deposant)->enAttente()->create();
 
         $this->get(route('depot.catalogue.show', $vetement))->assertNotFound();
-        $this->actingAs(User::factory()->create())->get(route('depot.catalogue.show', $vetement))->assertNotFound();
+        $this->actingAs(User::factory()->admin()->create())->get(route('depot.catalogue.show', $vetement))->assertNotFound();
         $this->actingAs($deposant)->get(route('depot.catalogue.show', $vetement))->assertOk();
     }
 
@@ -40,7 +40,7 @@ class ModerationTest extends TestCase
     {
         $vetement = Vetement::factory()->enAttente()->create(['titre' => 'Pull rayé']);
 
-        $response = $this->actingAs(User::factory()->create())->patch(route('admin.depot.vetements.approuver', $vetement));
+        $response = $this->actingAs(User::factory()->admin()->create())->patch(route('admin.depot.vetements.approuver', $vetement));
 
         $response->assertRedirect(route('admin.depot.vetements.show', $vetement));
         $response->assertSessionHas('success', 'Le vêtement « Pull rayé » est approuvé : il apparaît dans le catalogue.');
@@ -53,7 +53,7 @@ class ModerationTest extends TestCase
         $deposant = User::factory()->create();
         $vetement = Vetement::factory()->for($deposant)->enAttente()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->patch(route('admin.depot.vetements.refuser', $vetement), ['motif_refus' => 'La photo est floue.'])
             ->assertRedirect(route('admin.depot.vetements.show', $vetement));
 
@@ -68,7 +68,7 @@ class ModerationTest extends TestCase
     {
         $vetement = Vetement::factory()->enAttente()->create();
 
-        $response = $this->actingAs(User::factory()->create())->patch(route('admin.depot.vetements.refuser', $vetement), ['motif_refus' => '']);
+        $response = $this->actingAs(User::factory()->admin()->create())->patch(route('admin.depot.vetements.refuser', $vetement), ['motif_refus' => '']);
 
         $response->assertSessionHasErrors(['motif_refus' => 'Le champ motif du refus est obligatoire.']);
         $this->assertSame(Moderation::EnAttente, $vetement->fresh()->moderation);
@@ -100,7 +100,7 @@ class ModerationTest extends TestCase
         Vetement::factory()->create(['titre' => 'Robe publiée']);
         Vetement::factory(2)->enAttente()->sequence(['titre' => 'Veste à valider'], ['titre' => 'Jupe à valider'])->create();
 
-        $response = $this->actingAs(User::factory()->create())->get(route('admin.depot.vetements.index', ['moderation' => 'en_attente']));
+        $response = $this->actingAs(User::factory()->admin()->create())->get(route('admin.depot.vetements.index', ['moderation' => 'en_attente']));
 
         $response->assertSeeText('Veste à valider');
         $response->assertDontSeeText('Robe publiée');
@@ -112,7 +112,7 @@ class ModerationTest extends TestCase
     {
         Vetement::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('admin.depot.vetements.index', ['moderation' => 'en_attente']))
             ->assertSeeText('Aucun dépôt en attente : tous les dépôts des clients ont été traités.');
     }
@@ -121,7 +121,7 @@ class ModerationTest extends TestCase
     {
         $vetement = Vetement::factory()->enAttente()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->patch(route('admin.depot.vetements.approuver', $vetement), ['retour' => 'liste'])
             ->assertRedirect(route('admin.depot.vetements.index', ['moderation' => 'en_attente']));
 

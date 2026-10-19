@@ -29,7 +29,7 @@ class AnalysePhotoTest extends TestCase
     {
         $categorie = Categorie::factory()->create(['nom' => 'Hauts', 'description' => 'T-shirts, chemises et tops.']);
 
-        $response = $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.analyser'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('depot.mes-depots.analyser'), [
             'titre' => 'Chemise en lin homme taille M',
             'photo' => $this->photoBleue(),
         ]);
@@ -51,7 +51,7 @@ class AnalysePhotoTest extends TestCase
 
     public function test_fields_already_filled_by_the_user_are_kept(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.analyser'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('depot.mes-depots.analyser'), [
             'titre' => 'Chemise en lin',
             'matiere' => 'Coton bio',
             'description' => 'Ma propre description.',
@@ -64,7 +64,7 @@ class AnalysePhotoTest extends TestCase
 
     public function test_analysis_requires_a_valid_photo(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.analyser'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('depot.mes-depots.analyser'), [
             'titre' => 'Chemise',
             'photo' => UploadedFile::fake()->create('doc.pdf', 10, 'application/pdf'),
         ]);
@@ -102,7 +102,7 @@ class AnalysePhotoTest extends TestCase
 
     public function test_admin_can_analyse_a_photo_too(): void
     {
-        $response = $this->actingAs(User::factory()->create())->post(route('admin.depot.vetements.analyser'), [
+        $response = $this->actingAs(User::factory()->admin()->create())->post(route('admin.depot.vetements.analyser'), [
             'titre' => 'Jean',
             'photo' => $this->photoBleue(),
         ]);

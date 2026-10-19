@@ -5,15 +5,15 @@
 @section('content')
   @include('ateliers.partials.styles')
 
-  <section class="bg-light py-5">
-    <div class="container text-center py-md-4">
-      <h1 class="section-title">Ateliers &amp; réparations</h1>
-      <p class="mb-4">Un vêtement abîmé ? Décrivez-le ou envoyez une photo : nous estimons le coût et le délai de la réparation.</p>
+  <div class="tc-page">
+    <x-ui.hero surtitre="Réparation" titre="Ateliers & réparations"
+      sous-titre="Un vêtement abîmé ? Décrivez-le ou envoyez une photo : nous estimons le coût et le délai de la réparation."
+      :fil="['Accueil' => route('home'), 'Ateliers' => null]">
       @auth
-        <a href="{{ route('ateliers.demandes.index') }}" class="btn btn-outline-dark text-uppercase">Mes demandes</a>
+        <a href="{{ route('ateliers.demandes.index') }}" class="tc-btn tc-btn--clair">Mes demandes</a>
       @endauth
-    </div>
-  </section>
+    </x-ui.hero>
+  </div>
 
   <section class="py-5">
     <div class="container">

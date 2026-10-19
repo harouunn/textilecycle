@@ -162,7 +162,7 @@ class UpcyclingTest extends TestCase
 
     public function test_admin_liste_recherche_et_filtres(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->admin()->create();
         ProjetUpcycling::factory()->for(User::factory()->state(['name' => 'Auteur couture']))->create(['titre' => 'Tablier chemise', 'vetement_origine' => 'chemise', 'resultat' => 'tablier', 'statut' => 'publie', 'difficulte' => 'moyen']);
         ProjetUpcycling::factory()->for(User::factory()->state(['name' => 'Auteur laine']))->brouillon()->create(['titre' => 'Coussin pull', 'vetement_origine' => 'pull en laine', 'resultat' => 'coussin', 'difficulte' => 'facile']);
 
@@ -178,7 +178,7 @@ class UpcyclingTest extends TestCase
 
     public function test_admin_crud_projet_et_etapes(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)->post(route('admin.upcycling.projets.store'), $this->donneesProjet())->assertRedirect();
         $projet = ProjetUpcycling::firstOrFail();
@@ -206,7 +206,7 @@ class UpcyclingTest extends TestCase
 
     public function test_toutes_les_pages_de_formulaire_s_affichent(): void
     {
-        $projet = ProjetUpcycling::factory()->create();
+        $projet = ProjetUpcycling::factory()->for(User::factory()->admin())->create();
         $etape = EtapeProjet::factory()->for($projet, 'projet')->create();
         $user = $projet->user;
 
@@ -225,7 +225,7 @@ class UpcyclingTest extends TestCase
 
     public function test_admin_statut_obligatoire(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
             ->post(route('admin.upcycling.projets.store'), $this->donneesProjet(['statut' => '']))

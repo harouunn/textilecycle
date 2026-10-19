@@ -5,7 +5,7 @@
 
 @section('content')
 @php
-  $ctaUrl = auth()->check() ? route('admin.dashboard') : route('register');
+  $ctaUrl = auth()->check() ? auth()->user()->accueil() : route('register');
 
   $slides = [
     ['image' => 'banner-image-6.jpg', 'title' => 'Déposez vos vêtements', 'text' => 'Confiez-nous les vêtements que vous ne portez plus, en point de collecte ou en ligne.'],
@@ -14,27 +14,6 @@
     ['image' => 'banner-image-3.jpg', 'title' => 'Don aux associations', 'text' => 'Les vêtements en bon état sont redistribués à nos associations partenaires.'],
     ['image' => 'banner-image-4.jpg', 'title' => 'Mode responsable', 'text' => 'Chaque vêtement réutilisé, c\'est de l\'eau, de l\'énergie et des déchets économisés.'],
     ['image' => 'banner-image-5.jpg', 'title' => 'Une démarche solidaire', 'text' => 'Rejoignez une communauté engagée pour une mode plus juste et plus durable.'],
-  ];
-
-  $features = [
-    ['icon' => 'shopping-bag', 'title' => 'Dépôt simplifié', 'text' => 'Déposez vos vêtements en quelques clics ou dans l\'un de nos points de collecte.'],
-    ['icon' => 'arrow-cycle', 'title' => 'Réparation', 'text' => 'Nos couturiers partenaires réparent les pièces abîmées pour prolonger leur vie.'],
-    ['icon' => 'gift', 'title' => 'Upcycling', 'text' => 'Les textiles non réparables sont transformés en nouvelles créations originales.'],
-    ['icon' => 'heart', 'title' => 'Dons solidaires', 'text' => 'Les vêtements en bon état sont offerts aux associations de votre région.'],
-  ];
-
-  $services = [
-    ['image' => 'cat-item1.jpg', 'label' => 'Déposer mes vêtements'],
-    ['image' => 'cat-item2.jpg', 'label' => 'Faire réparer'],
-    ['image' => 'cat-item3.jpg', 'label' => 'Donner à une association'],
-  ];
-
-  $creations = [
-    ['image' => 'product-item-1.jpg', 'title' => 'Robe fleurie revisitée'],
-    ['image' => 'product-item-2.jpg', 'title' => 'Chemise patchwork'],
-    ['image' => 'product-item-3.jpg', 'title' => 'Chemise en coton réparée'],
-    ['image' => 'product-item-4.jpg', 'title' => 'Pull court retravaillé'],
-    ['image' => 'product-item-10.jpg', 'title' => 'Pull recousu main'],
   ];
 
   $testimonials = [
@@ -62,17 +41,17 @@
               <div class="swiper-slide">
                 <div class="banner-item image-zoom-effect">
                   <div class="image-holder">
-                    <a href="#services">
-                      <img src="{{ asset('front/images/'.$slide['image']) }}" alt="{{ $slide['title'] }}" class="img-fluid">
+                    <a href="#concept">
+                      <img loading="lazy" decoding="async" src="{{ asset('front/images/'.$slide['image']) }}" alt="{{ $slide['title'] }}" class="img-fluid">
                     </a>
                   </div>
                   <div class="banner-content py-4">
                     <h5 class="element-title text-uppercase">
-                      <a href="#services" class="item-anchor">{{ $slide['title'] }}</a>
+                      <a href="#concept" class="item-anchor">{{ $slide['title'] }}</a>
                     </h5>
                     <p>{{ $slide['text'] }}</p>
                     <div class="btn-left">
-                      <a href="#services" class="btn-link fs-6 text-uppercase item-anchor text-decoration-none">En savoir plus</a>
+                      <a href="#concept" class="btn-link fs-6 text-uppercase item-anchor text-decoration-none">En savoir plus</a>
                     </div>
                   </div>
                 </div>
@@ -91,93 +70,73 @@
     </div>
   </section>
 
-  {{-- Le concept --}}
-  <section id="concept" class="features py-5">
-    <div class="container">
-      <div class="row">
-        @foreach ($features as $feature)
-          <div class="col-md-3 text-center" data-aos="fade-in" data-aos-delay="{{ $loop->index * 300 }}">
-            <div class="py-5">
-              <svg width="38" height="38" viewBox="0 0 24 24">
-                <use xlink:href="#{{ $feature['icon'] }}"></use>
-              </svg>
-              <h4 class="element-title text-capitalize my-3">{{ $feature['title'] }}</h4>
-              <p>{{ $feature['text'] }}</p>
-            </div>
+  {{-- Le cycle TexTileCycle : les quatre gestions, avec leurs vrais chiffres --}}
+  @php
+    $etapesCycle = [
+        ['numero' => '01', 'titre' => 'Déposer', 'texte' => 'Photographiez votre vêtement : notre analyse remplit la fiche pour vous. Après validation, il rejoint le catalogue.', 'chiffre' => $chiffres['vetements'], 'unite' => 'vêtement(s) disponible(s)', 'lien' => route('depot.catalogue.index'), 'action' => 'Voir le catalogue', 'icone' => 'cintre'],
+        ['numero' => '02', 'titre' => 'Réparer', 'texte' => 'Un trou, une fermeture, un ourlet ? Nos ateliers partenaires diagnostiquent et estiment la réparation.', 'chiffre' => $chiffres['ateliers'], 'unite' => 'atelier(s) partenaire(s)', 'lien' => route('ateliers.index'), 'action' => 'Trouver un atelier', 'icone' => 'cle'],
+        ['numero' => '03', 'titre' => 'Transformer', 'texte' => 'Trop abîmé pour être porté ? Il devient un sac, un coussin ou une création unique grâce à l\'upcycling.', 'chiffre' => $chiffres['projets'], 'unite' => 'projet(s) d\'upcycling', 'lien' => route('upcycling.index'), 'action' => 'Voir les créations', 'icone' => 'etincelle'],
+        ['numero' => '04', 'titre' => 'Donner', 'texte' => 'Les vêtements en bon état habillent celles et ceux qui en ont besoin, via nos associations partenaires.', 'chiffre' => $chiffres['associations'], 'unite' => 'association(s) partenaire(s)', 'lien' => route('dons.index'), 'action' => 'Faire un don', 'icone' => 'feuille'],
+    ];
+  @endphp
+
+  <section id="concept" class="tc-page py-5">
+    <div class="container py-md-4">
+      <div class="text-center mb-5">
+        <div class="tc-surtitre">Le cycle TexTileCycle</div>
+        <h2 class="section-title mt-2">Quatre chemins pour une seconde vie</h2>
+        <p class="mx-auto" style="max-width: 640px;">Chaque vêtement trouve sa meilleure destination. Les quatre gestions de la plateforme sont reliées : un vêtement déposé peut être réparé, transformé ou donné.</p>
+      </div>
+      <div class="row g-4">
+        @foreach ($etapesCycle as $etape)
+          <div class="col-md-6 col-lg-3">
+            <a href="{{ $etape['lien'] }}" class="tc-cycle-carte">
+              <div class="d-flex justify-content-between align-items-start mb-4">
+                <span class="tc-cycle-carte__numero">{{ $etape['numero'] }}</span>
+                <span class="tc-stat__icone"><x-ui.icone :nom="$etape['icone']" /></span>
+              </div>
+              <h3>{{ $etape['titre'] }}</h3>
+              <p>{{ $etape['texte'] }}</p>
+              <div class="tc-cycle-carte__chiffre"><strong>{{ $etape['chiffre'] }}</strong> {{ $etape['unite'] }}</div>
+              <span class="tc-produit__cta mt-3 d-inline-block">{{ $etape['action'] }}</span>
+            </a>
           </div>
         @endforeach
       </div>
     </div>
   </section>
 
-  {{-- Services --}}
-  <section id="services" class="categories overflow-hidden">
-    <div class="container">
-      <div class="open-up" data-aos="zoom-out">
-        <div class="row">
-          @foreach ($services as $service)
-            <div class="col-md-4">
-              <div class="cat-item image-zoom-effect">
-                <div class="image-holder">
-                  <a href="{{ $ctaUrl }}">
-                    <img src="{{ asset('front/images/'.$service['image']) }}" alt="{{ $service['label'] }}" class="product-image img-fluid">
-                  </a>
-                </div>
-                <div class="category-content">
-                  <div class="product-button">
-                    <a href="{{ $ctaUrl }}" class="btn btn-common text-uppercase">{{ $service['label'] }}</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          @endforeach
-        </div>
+  @if ($chiffres['impact']['vetements'] > 0)
+    <div class="tc-bandeau-impact">
+      <div class="container d-flex flex-wrap justify-content-center gap-4 gap-md-5">
+        <span><x-ui.icone nom="cintre" /> <strong>{{ $chiffres['impact']['vetements'] }}</strong> vêtement(s) ont trouvé une seconde vie</span>
+        <span><x-ui.icone nom="feuille" /> <strong>{{ \App\Services\Depot\ImpactEcologique::formaterEau($chiffres['impact']['eau']) }}</strong> d'eau économisés</span>
+        <span><x-ui.icone nom="etincelle" /> <strong>{{ number_format($chiffres['impact']['co2'], 0, ',', ' ') }} kg</strong> de CO₂ évités</span>
       </div>
     </div>
-  </section>
+  @endif
 
-  {{-- Créations upcyclées --}}
-  <section id="creations" class="new-arrival product-carousel py-5 position-relative overflow-hidden">
-    <div class="container">
-      <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 mb-3">
-        <h4 class="text-uppercase">Nos dernières créations upcyclées</h4>
-        <a href="#creations" class="btn-link">Bientôt en ligne</a>
-      </div>
-      <div class="swiper product-swiper open-up" data-aos="zoom-out">
-        <div class="swiper-wrapper d-flex">
-          @foreach ($creations as $creation)
-            <div class="swiper-slide">
-              <div class="product-item image-zoom-effect link-effect">
-                <div class="image-holder position-relative">
-                  <a href="#creations">
-                    <img src="{{ asset('front/images/'.$creation['image']) }}" alt="{{ $creation['title'] }}" class="product-image img-fluid">
-                  </a>
-                  <a href="#creations" class="btn-icon btn-wishlist" aria-label="J'aime">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <use xlink:href="#heart"></use>
-                    </svg>
-                  </a>
-                  <div class="product-content">
-                    <h5 class="element-title text-uppercase fs-5 mt-3">
-                      <a href="#creations">{{ $creation['title'] }}</a>
-                    </h5>
-                    <a href="#creations" class="text-decoration-none" data-after="Découvrir"><span>Pièce unique</span></a>
-                  </div>
-                </div>
-              </div>
+  {{-- Derniers vêtements du catalogue (données réelles) --}}
+  @if ($derniersVetements->isNotEmpty())
+    <section id="creations" class="tc-page py-5">
+      <div class="container py-md-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+          <div>
+            <div class="tc-surtitre">Catalogue solidaire</div>
+            <h2 class="section-title mt-2 mb-0">Nouveautés à réserver</h2>
+          </div>
+          <a href="{{ route('depot.catalogue.index') }}" class="tc-btn tc-btn--clair">Tout le catalogue <x-ui.icone nom="fleche" /></a>
+        </div>
+        <div class="row g-4">
+          @foreach ($derniersVetements as $vetement)
+            <div class="col-6 col-md-4 col-lg-3">
+              <x-depot.carte-vetement :vetement="$vetement" />
             </div>
           @endforeach
         </div>
-        <div class="swiper-pagination"></div>
       </div>
-      <div class="icon-arrow icon-arrow-left"><svg width="50" height="50" viewBox="0 0 24 24">
-          <use xlink:href="#arrow-left"></use>
-        </svg></div>
-      <div class="icon-arrow icon-arrow-right"><svg width="50" height="50" viewBox="0 0 24 24">
-          <use xlink:href="#arrow-right"></use>
-        </svg></div>
-    </div>
-  </section>
+    </section>
+  @endif
 
   {{-- Engagement --}}
   <section class="collection bg-light position-relative py-5">
@@ -187,7 +146,7 @@
         <div class="collection-item d-flex flex-wrap my-5">
           <div class="col-md-6 column-container">
             <div class="image-holder">
-              <img src="{{ asset('front/images/single-image-2.jpg') }}" alt="Vêtements prêts pour une seconde vie" class="product-image img-fluid">
+              <img loading="lazy" decoding="async" src="{{ asset('front/images/single-image-2.jpg') }}" alt="Vêtements prêts pour une seconde vie" class="product-image img-fluid">
             </div>
           </div>
           <div class="col-md-6 column-container bg-white">
@@ -234,28 +193,41 @@
         <h3 class="section-title text-uppercase">Nos associations partenaires</h3>
         <p>Les vêtements en bon état sont redistribués à des associations locales engagées.</p>
       </div>
-      <div class="row">
-        <div class="logo-content d-flex flex-wrap justify-content-between">
-          @foreach (range(1, 5) as $logo)
-            <img src="{{ asset('front/images/logo'.$logo.'.png') }}" alt="Association partenaire" class="logo-image img-fluid">
+      @if ($associations->isNotEmpty())
+        <div class="tc-page d-flex flex-wrap justify-content-center gap-3">
+          @foreach ($associations as $association)
+            <a href="{{ route('dons.associations.show', $association) }}" class="tc-carte tc-association">
+              <strong>{{ $association->nom }}</strong>
+              <span>{{ $association->ville }}</span>
+            </a>
           @endforeach
         </div>
-      </div>
+      @else
+        <div class="row">
+          <div class="logo-content d-flex flex-wrap justify-content-between">
+            @foreach (range(1, 5) as $logo)
+              <img loading="lazy" decoding="async" src="{{ asset('front/images/logo'.$logo.'.png') }}" alt="Association partenaire" class="logo-image img-fluid">
+            @endforeach
+          </div>
+        </div>
+      @endif
     </div>
   </section>
 
-  {{-- Newsletter --}}
-  <section class="newsletter bg-light" style="background: url({{ asset('front/images/pattern-bg.png') }}) no-repeat;">
+  {{-- Appel à l'action --}}
+  <section class="newsletter bg-light tc-page" style="background: url({{ asset('front/images/pattern-bg.png') }}) no-repeat;">
     <div class="container">
       <div class="row justify-content-center">
-        <div class="col-md-8 py-5 my-5">
-          <div class="subscribe-header text-center pb-3">
-            <h3 class="section-title text-uppercase">Restez informé de nos actions</h3>
+        <div class="col-md-8 py-5 my-5 text-center">
+          <div class="tc-surtitre mb-2">Rejoignez le cycle</div>
+          <h3 class="section-title text-uppercase mb-3">Un vêtement que vous ne portez plus ?</h3>
+          <p class="mb-4">Déposez-le en deux minutes : notre analyse de photo remplit la fiche, l'équipe la valide, et il trouve preneur.</p>
+          <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{{ route('depot.mes-depots.create') }}" class="tc-btn tc-btn--vert"><x-ui.icone nom="plus" /> Déposer un vêtement</a>
+            @guest
+              <a href="{{ route('register') }}" class="tc-btn tc-btn--clair">Créer un compte</a>
+            @endguest
           </div>
-          <form id="form" class="d-flex flex-wrap gap-2" onsubmit="return false;">
-            <input type="email" name="email" placeholder="Votre adresse e-mail" class="form-control form-control-lg">
-            <button class="btn btn-dark btn-lg text-uppercase w-100">Je m'inscris</button>
-          </form>
         </div>
       </div>
     </div>
@@ -271,7 +243,7 @@
         <div class="col-6 col-sm-4 col-md-2">
           <div class="insta-item">
             <a href="#">
-              <img src="{{ asset('front/images/insta-item'.$photo.'.jpg') }}" alt="Instagram TexTileCycle" class="insta-image img-fluid">
+              <img loading="lazy" decoding="async" src="{{ asset('front/images/insta-item'.$photo.'.jpg') }}" alt="Instagram TexTileCycle" class="insta-image img-fluid">
             </a>
           </div>
         </div>

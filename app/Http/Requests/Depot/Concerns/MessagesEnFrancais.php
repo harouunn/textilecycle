@@ -23,10 +23,17 @@ trait MessagesEnFrancais
             Enum::class => 'La valeur sélectionnée pour :attribute est invalide.',
             'unique' => 'Ce :attribute est déjà utilisé.',
             'date' => 'Le champ :attribute doit être une date valide.',
+            'boolean' => 'Le champ :attribute doit être oui ou non.',
+            'min' => ['numeric' => 'Le champ :attribute doit être supérieur ou égal à :min.'],
             'max' => [
+                'numeric' => 'Le champ :attribute ne doit pas dépasser :max.',
                 'string' => 'Le champ :attribute ne doit pas dépasser :max caractères.',
                 'file' => 'Le fichier :attribute ne doit pas dépasser :max Ko.',
             ],
+            'couleur.regex' => 'La couleur doit être au format #RRGGBB (ex. #3d7a4f).',
+            'date_retrait.after' => 'Le retrait est possible à partir de demain.',
+            'date_retrait.before_or_equal' => 'Le retrait doit avoir lieu dans les 14 prochains jours.',
+            'telephone.regex' => 'Le numéro de téléphone n\'est pas valide (ex. 22 123 456).',
             'nom.unique' => 'Une catégorie porte déjà ce nom.',
             'date_depot.before_or_equal' => 'La date de dépôt ne peut pas être dans le futur.',
             'photo.image' => 'Le fichier doit être une image.',
@@ -56,6 +63,14 @@ trait MessagesEnFrancais
             'statut' => 'statut',
             'date_depot' => 'date de dépôt',
             'motif_refus' => 'motif du refus',
+            'couleur' => 'couleur',
+            'ordre' => 'ordre d\'affichage',
+            'active' => 'catégorie active',
+            'date_retrait' => 'date de retrait',
+            'creneau' => 'créneau',
+            'telephone' => 'téléphone',
+            'message' => 'message',
+            'motif_annulation' => 'motif de l\'annulation',
         ];
     }
 }

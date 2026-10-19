@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('upcycling')->name('upcycling.')->group(function () {
     Route::get('/', [GalerieController::class, 'index'])->name('index');
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/mes-projets', [MesProjetsController::class, 'index'])->name('mes-projets');
         Route::resource('projets', MesProjetsController::class)->except(['index', 'show']);
         Route::resource('projets.etapes', EtapeProjetController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);

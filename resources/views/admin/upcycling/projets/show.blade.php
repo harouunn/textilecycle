@@ -53,6 +53,9 @@
           <div class="v-col-sm-6 v-col-12">
             <h6 class="text-h6 mb-1">Vêtement d'origine</h6>
             <p class="mb-0">{{ $projet->vetement_origine }}</p>
+            @if ($projet->vetement)
+              <a href="{{ route('admin.depot.vetements.show', $projet->vetement) }}" class="text-body-2">Voir le vêtement du catalogue</a>
+            @endif
           </div>
           <div class="v-col-sm-6 v-col-12">
             <h6 class="text-h6 mb-1">Résultat</h6>

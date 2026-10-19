@@ -3,22 +3,41 @@
 @section('title', 'Déposer un vêtement')
 
 @section('content')
-  @include('depot.partials.styles')
 
-  <section class="bg-light py-5">
-    <div class="container py-md-4" style="max-width: 900px;">
-      <h1 class="section-title text-center mb-2">Déposer un vêtement</h1>
-      <p class="text-center mb-5">Décrivez votre vêtement : nous lui trouverons la meilleure seconde vie.</p>
+  <div class="tc-page">
+    <x-ui.hero
+      surtitre="Dépôt solidaire"
+      titre="Déposer un vêtement"
+      sous-titre="Décrivez votre vêtement, ou laissez notre analyse de photo pré-remplir la fiche. Il sera publié après validation par l'équipe."
+      :fil="['Catalogue' => route('depot.catalogue.index'), 'Déposer un vêtement' => null]" />
 
-      <div class="bg-white p-4 p-md-5">
-        @include('depot.partials.flash')
-        @include('depot.partials.analyse')
+    <section class="py-5">
+      <div class="container">
+        <div class="row g-5">
+          <div class="col-lg-8">
+            @include('depot.partials.flash')
+            @include('depot.partials.analyse')
 
-        <form method="POST" action="{{ route('depot.mes-depots.store') }}" enctype="multipart/form-data">
-          @csrf
-          @include('depot.mes-depots._form', ['submitLabel' => 'Déposer mon vêtement', 'analyseRoute' => 'depot.mes-depots.analyser'])
-        </form>
+            <form method="POST" action="{{ route('depot.mes-depots.store') }}" enctype="multipart/form-data" class="tc-carte tc-carte__corps p-md-5">
+              @csrf
+              @include('depot.mes-depots._form', ['submitLabel' => 'Déposer mon vêtement', 'analyseRoute' => 'depot.mes-depots.analyser'])
+            </form>
+          </div>
+
+          <aside class="col-lg-4">
+            <div class="tc-carte tc-carte__corps">
+              <h2 class="fs-6 text-uppercase mb-3" style="letter-spacing: .08em;">Après votre dépôt</h2>
+              <ol class="tc-numeros">
+                <li><strong>Validation</strong> L'équipe vérifie la photo et la description.</li>
+                <li><strong>Publication</strong> Votre vêtement apparaît dans le catalogue.</li>
+                <li><strong>Seconde vie</strong> Un membre le réserve et vient le retirer.</li>
+              </ol>
+              <hr>
+              <p class="small mb-0">Astuce : une photo nette, à la lumière du jour et sur un fond clair, donne le meilleur classement automatique.</p>
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 @endsection
