@@ -1,0 +1,121 @@
+/* Styles réservés à la page Mes projets Upcycling. */
+.upcycling-my-projects { --upm-ink: #213e32; --upm-muted: #59665f; --upm-line: #e1e5dc; --upm-green: #285640; padding: 36px 0 72px; background: #f7f7f1; color: var(--upm-ink); }
+.upcycling-my-projects .upm-container { max-width: 1240px; }
+.upcycling-my-projects .upm-hero { position: relative; display: grid; grid-template-columns: 1fr 280px; gap: 36px; align-items: center; overflow: hidden; padding: 48px; border: 1px solid #dbe3d5; border-radius: 24px; background: #eaf0e3; }
+.upcycling-my-projects .upm-hero-content { position: relative; z-index: 1; }
+.upcycling-my-projects .upm-eyebrow { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: #49644c; font-size: .73rem; font-weight: 650; letter-spacing: .15em; text-transform: uppercase; }
+.upcycling-my-projects .upm-eyebrow > span { font-size: 1.3rem; }
+.upcycling-my-projects .upm-title { margin: 0 0 18px; color: #213e32; font-size: clamp(2.25rem, 4vw, 3.6rem); font-weight: 400; letter-spacing: -.035em; line-height: 1.12; text-transform: none; }
+.upcycling-my-projects .upm-title em { display: block; color: #426b45; font-weight: 400; }
+.upcycling-my-projects .upm-intro { max-width: 570px; margin: 0 0 24px; font-size: 1rem; line-height: 1.8; color: #475c4c; }
+.upcycling-my-projects .upm-header-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.upcycling-my-projects .upm-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 11px 20px; border: 1px solid transparent; border-radius: 12px; font: inherit; font-size: .85rem; font-weight: 600; line-height: 1.5; text-align: center; text-decoration: none; transition: background .18s ease, border-color .18s ease, box-shadow .18s ease; cursor: pointer; }
+.upcycling-my-projects .upm-button-primary { color: #fff; background: var(--upm-green); border-color: var(--upm-green); }
+.upcycling-my-projects .upm-button-primary:hover { color: #fff; background: #1d4230; box-shadow: 0 4px 12px #28564025; }
+.upcycling-my-projects .upm-button-quiet { color: var(--upm-ink); border-color: #a6b89f; background: transparent; }
+.upcycling-my-projects .upm-button-quiet:hover { background: #ffffff80; }
+.upcycling-my-projects .upm-hero-note { max-width: 540px; margin: 16px 0 0; font-size: .76rem; line-height: 1.6; color: #53684f; }
+.upcycling-my-projects .upm-textile-art { position: relative; height: 260px; }
+.upcycling-my-projects .upm-fabric { position: absolute; width: 155px; height: 170px; border-radius: 14px 35px 14px 14px; box-shadow: 0 12px 24px #263e3020; }
+.upcycling-my-projects .upm-fabric::after { content: ''; position: absolute; inset: 11px; border: 1px dashed #ffffffb0; border-radius: 8px 25px 8px 8px; }
+.upcycling-my-projects .upm-fabric-denim { left: 4px; top: 18px; transform: rotate(-17deg); background: repeating-linear-gradient(135deg, #4d6a7920 0 1px, transparent 1px 5px), #617f8d; }
+.upcycling-my-projects .upm-fabric-clay { right: 0; top: 50px; transform: rotate(14deg); background: repeating-linear-gradient(0deg, #ffffff20 0 1px, transparent 1px 7px), repeating-linear-gradient(90deg, #ffffff20 0 1px, transparent 1px 7px), #b87558; }
+.upcycling-my-projects .upm-fabric-sage { left: 52px; top: 72px; transform: rotate(-4deg); background: radial-gradient(#ffffff50 1px, transparent 1px) 0 0 / 7px 7px, #75946c; }
+.upcycling-my-projects .upm-art-label { position: absolute; bottom: -4px; left: 0; width: 100%; color: #52684e; font-size: .68rem; text-align: center; letter-spacing: .04em; }
+.upcycling-my-projects .upm-messages:not(:empty) { margin-top: 24px; }
+.upcycling-my-projects .upm-messages .alert { border-radius: 12px; overflow-wrap: anywhere; }
+.upcycling-my-projects .upm-overview { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 28px; padding: 20px 8px; border: 1px solid var(--upm-line); border-radius: 18px; background: #fff; }
+.upcycling-my-projects .upm-stat { display: flex; flex-direction: column; gap: 4px; padding: 0 24px; color: var(--upm-muted); font-size: .78rem; }
+.upcycling-my-projects .upm-stat + .upm-stat { border-left: 1px solid var(--upm-line); }
+.upcycling-my-projects .upm-stat-number { color: var(--upm-ink); font-size: 1.8rem; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.upcycling-my-projects .upm-stat-total .upm-stat-number { color: var(--upm-green); }
+.upcycling-my-projects .upm-stats-note { margin: 8px 4px 0; color: var(--upm-muted); font-size: .73rem; }
+.upcycling-my-projects .upm-collection-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin: 38px 0 22px; }
+.upcycling-my-projects .upm-collection-heading .upm-eyebrow { margin-bottom: 7px; }
+.upcycling-my-projects .upm-collection-heading h2 { margin: 0; color: var(--upm-ink); font-size: 1.8rem; text-transform: none; letter-spacing: -.02em; }
+.upcycling-my-projects .upm-collection-heading > p { margin: 0; color: var(--upm-muted); font-size: .8rem; }
+.upcycling-my-projects .upm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.upcycling-my-projects .upm-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--upm-line); border-radius: 18px; background: #fff; box-shadow: 0 4px 18px #213e3206; transition: transform .2s ease, box-shadow .2s ease; }
+.upcycling-my-projects .upm-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px #213e3212; }
+.upcycling-my-projects .upm-card-visual { position: relative; }
+.upcycling-my-projects .upm-image-link { display: block; }
+.upcycling-my-projects .upm-cover { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: #eef0e8; }
+.upcycling-my-projects .upm-status { position: absolute; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border: 1px solid #ffffffb0; border-radius: 8px; font-size: .72rem; font-weight: 650; line-height: 1.5; pointer-events: none; }
+.upcycling-my-projects .upm-status-brouillon { color: #354f63; background: #e9eff6; }
+.upcycling-my-projects .upm-status-soumis { color: #6e5116; background: #fff3d4; }
+.upcycling-my-projects .upm-status-publie { color: #245436; background: #e4f1df; }
+.upcycling-my-projects .upm-status-rejete { color: #873d2d; background: #fae9e2; }
+.upcycling-my-projects .upm-placeholder { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; aspect-ratio: 16 / 10; color: #52684f; background: repeating-linear-gradient(0deg, #70826307 0 1px, transparent 1px 8px), repeating-linear-gradient(90deg, #70826307 0 1px, transparent 1px 8px), #eef0e7; font-size: .82rem; }
+.upcycling-my-projects .upm-placeholder .upm-placeholder-patch { display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 5px; border: 1px dashed #82977b; border-radius: 14px; font-size: 1.8rem; transform: rotate(-8deg); }
+.upcycling-my-projects .upm-placeholder small { color: #5f6d5b; font-size: .7rem; }
+.upcycling-my-projects .upm-card-body { display: flex; flex-direction: column; flex-grow: 1; padding: 23px; overflow-wrap: anywhere; }
+.upcycling-my-projects .upm-created { margin: 0 0 8px; color: var(--upm-muted); font-size: .72rem; }
+.upcycling-my-projects .upm-card h3 { margin: 0 0 18px; font-size: 1.28rem; line-height: 1.35; letter-spacing: -.01em; text-transform: none; }
+.upcycling-my-projects .upm-card h3 a { color: var(--upm-ink); text-decoration: none; }
+.upcycling-my-projects .upm-card h3 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.upcycling-my-projects .upm-transformation { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-bottom: 20px; padding: 13px; border-radius: 10px; background: #f5f6f0; }
+.upcycling-my-projects .upm-transformation div > span { color: var(--upm-muted); font-size: .65rem; text-transform: uppercase; letter-spacing: .06em; }
+.upcycling-my-projects .upm-transformation p { margin: 3px 0 0; color: var(--upm-ink); font-size: .8rem; line-height: 1.5; }
+.upcycling-my-projects .upm-transform-arrow { color: #67815c; font-size: 1.1rem; }
+.upcycling-my-projects .upm-details { display: grid; grid-template-columns: 1fr 1fr .65fr; gap: 10px; margin: 0 0 20px; }
+.upcycling-my-projects .upm-details dt { margin-bottom: 4px; color: var(--upm-muted); font-size: .7rem; font-weight: 400; }
+.upcycling-my-projects .upm-details dd { margin: 0; color: var(--upm-ink); font-size: .81rem; font-weight: 600; }
+.upcycling-my-projects .upm-moderation { font-size: .8rem; }
+.upcycling-my-projects .upm-moderation .alert { border-radius: 10px; padding: 12px; line-height: 1.65; }
+.upcycling-my-projects .upm-moderation .alert-warning { color: #75432f; background: #fcf0e7; border-color: #ead5c6; }
+.upcycling-my-projects .upm-moderation .btn { width: 100%; min-height: 44px; padding: 10px 12px; font-size: .76rem; letter-spacing: .02em; }
+.upcycling-my-projects .upm-moderation form > p { margin: 9px 0 0; color: var(--upm-muted); font-size: .73rem; line-height: 1.6; }
+.upcycling-my-projects .upm-card-actions { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 12px; margin-top: auto; padding-top: 20px; border-top: 1px solid var(--upm-line); }
+.upcycling-my-projects .upm-card-actions .upm-button { padding: 9px 10px; font-size: .78rem; }
+.upcycling-my-projects .upm-button-preview { color: #fff; background: var(--upm-green); }
+.upcycling-my-projects .upm-button-preview:hover { color: #fff; background: #1d4230; }
+.upcycling-my-projects .upm-button-secondary { color: var(--upm-ink); background: #fff; border-color: #cfd9cd; }
+.upcycling-my-projects .upm-button-secondary:hover { background: #f1f5ec; }
+.upcycling-my-projects .upm-steps { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: #2d593e; font-size: .76rem; text-decoration: underline; text-underline-offset: 4px; }
+.upcycling-my-projects .upm-delete-form { margin: 0; justify-self: end; }
+.upcycling-my-projects .upm-delete { min-height: 44px; padding: 6px 0 6px 12px; border: 0; background: transparent; color: #964936; font: inherit; font-size: .75rem; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.upcycling-my-projects .upm-delete:hover { color: #6f281c; }
+.upcycling-my-projects .upm-pagination { display: flex; justify-content: center; margin-top: 36px; }
+.upcycling-my-projects .upm-pagination .pagination { flex-wrap: wrap; gap: 4px; }
+.upcycling-my-projects .upm-empty { display: flex; flex-direction: column; align-items: center; margin-top: 28px; padding: 60px 24px; border: 1px solid var(--upm-line); border-radius: 24px; background: #fff; text-align: center; }
+.upcycling-my-projects .upm-empty-art { display: grid; place-items: center; width: 95px; height: 95px; margin-bottom: 28px; border: 1px dashed #7e9773; border-radius: 25px 40px 25px 25px; background: repeating-linear-gradient(45deg, #91a88210 0 2px, transparent 2px 8px), #edf2e5; transform: rotate(-9deg); }
+.upcycling-my-projects .upm-empty-art span { color: #66835d; font-size: 2.5rem; transform: rotate(9deg); }
+.upcycling-my-projects .upm-empty h2 { max-width: 540px; margin: 0 0 16px; color: var(--upm-ink); font-size: clamp(1.7rem, 3vw, 2.2rem); text-transform: none; }
+.upcycling-my-projects .upm-empty > p:not(.upm-eyebrow) { max-width: 500px; margin-bottom: 26px; color: var(--upm-muted); line-height: 1.8; }
+.upcycling-my-projects :is(a, button):focus-visible { outline: 3px solid #285a81; outline-offset: 4px; }
+.upcycling-my-projects .upm-image-link:focus-visible { outline-offset: -5px; }
+@media (max-width: 991px) {
+  .upcycling-my-projects .upm-hero { grid-template-columns: 1fr 210px; gap: 20px; padding: 32px; }
+  .upcycling-my-projects .upm-textile-art { transform: scale(.8); transform-origin: center; }
+  .upcycling-my-projects .upm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .upcycling-my-projects .upm-stat { padding: 0 15px; }
+}
+@media (max-width: 767px) {
+  .upcycling-my-projects { padding-top: 20px; }
+  .upcycling-my-projects .upm-hero { grid-template-columns: 1fr; padding: 28px 24px; }
+  .upcycling-my-projects .upm-textile-art { display: none; }
+  .upcycling-my-projects .upm-title em { display: inline; }
+  .upcycling-my-projects .upm-stat { padding: 0 12px; font-size: .7rem; }
+  .upcycling-my-projects .upm-stat-number { font-size: 1.5rem; }
+  .upcycling-my-projects .upm-overview { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 16px 4px; }
+  .upcycling-my-projects .upm-stat-total { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 10px; margin: 0 12px 16px; padding: 0 0 14px; border-bottom: 1px solid var(--upm-line); }
+  .upcycling-my-projects .upm-stat-total + .upm-stat { border-left: 0; }
+  .upcycling-my-projects .upm-collection-heading { align-items: start; flex-direction: column; gap: 10px; margin-top: 28px; }
+}
+@media (max-width: 575px) {
+  .upcycling-my-projects .upm-grid { grid-template-columns: minmax(0, 1fr); }
+  .upcycling-my-projects .upm-container { padding-inline: 16px; }
+  .upcycling-my-projects .upm-hero { padding: 26px 22px; border-radius: 18px; }
+  .upcycling-my-projects .upm-title { font-size: 2.2rem; }
+  .upcycling-my-projects .upm-intro { font-size: .9rem; }
+  .upcycling-my-projects .upm-header-actions { flex-direction: column; }
+  .upcycling-my-projects .upm-header-actions .upm-button { width: 100%; }
+  .upcycling-my-projects .upm-card-body { padding: 20px; }
+  .upcycling-my-projects .upm-stat { padding-inline: 9px; }
+  .upcycling-my-projects .upm-empty { padding: 40px 22px; }
+  .upcycling-my-projects .upm-empty .upm-button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .upcycling-my-projects .upm-card, .upcycling-my-projects .upm-button { transition: none; }
+  .upcycling-my-projects .upm-card:hover { transform: none; }
+}

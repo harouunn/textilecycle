@@ -18,6 +18,7 @@
   .tcu-pre { white-space: pre-line; }
   .tcu-etape + .tcu-etape { border-top: 1px solid rgba(var(--v-theme-on-surface), .12); }
   .tcu-inline-form { display: inline; }
+  .tcu-decisions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .75rem; margin-block: .75rem; text-align: start; white-space: normal; }
   .tcu-rejection { display: inline-block; vertical-align: top; text-align: start; }
   .tcu-rejection > summary { cursor: pointer; }
   .tcu-rejection-form { min-width: 18rem; max-width: 24rem; white-space: normal; padding: .75rem; margin-top: .5rem; border: 1px solid rgba(var(--v-theme-on-surface), .22); border-radius: 6px; }

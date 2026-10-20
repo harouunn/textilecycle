@@ -117,30 +117,7 @@
                   <span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
                   <span class="v-btn__content"><i class="bx-show v-icon notranslate v-theme--light" aria-hidden="true"></i> Voir</span>
                 </a>
-                @if ($projet->statut === \App\Enums\Upcycling\StatutProjet::Soumis)
-                  @can('moderate', $projet)
-                    <form method="POST" action="{{ route('admin.upcycling.projets.publier', $projet) }}" class="tcu-inline-form" data-upcycling-publish="{{ $projet->id }}"
-                      onsubmit="return confirm('Confirmer la publication de ce projet dans la galerie publique ?')">
-                      @csrf
-                      <button type="submit" class="v-btn v-theme--light bg-success v-btn--density-default v-btn--size-small v-btn--variant-tonal">Publier</button>
-                    </form>
-                    @php($refusActif = (string) old('moderation_projet_id') === (string) $projet->id)
-                    <details class="tcu-rejection" data-upcycling-reject="{{ $projet->id }}" @if ($refusActif && $errors->has('commentaire_refus')) open @endif>
-                      <summary class="v-btn v-theme--light text-error v-btn--density-default v-btn--size-small v-btn--variant-outlined">Rejeter</summary>
-                      <form method="POST" action="{{ route('admin.upcycling.projets.rejeter', $projet) }}" class="tcu-rejection-form">
-                        @csrf
-                        <input type="hidden" name="moderation_projet_id" value="{{ $projet->id }}">
-                        <label class="tcu-label" for="commentaire-refus-{{ $projet->id }}">Commentaire de refus (obligatoire)</label>
-                        <textarea id="commentaire-refus-{{ $projet->id }}" name="commentaire_refus" required maxlength="2000" class="tcu-input" rows="3"
-                          aria-invalid="{{ $refusActif && $errors->has('commentaire_refus') ? 'true' : 'false' }}">{{ $refusActif ? old('commentaire_refus') : '' }}</textarea>
-                        @if ($refusActif)
-                          @error('commentaire_refus') <div class="tcu-error" role="alert">{{ $message }}</div> @enderror
-                        @endif
-                        <button type="submit" class="v-btn v-theme--light text-error v-btn--density-default v-btn--size-small v-btn--variant-outlined mt-2">Confirmer le refus</button>
-                      </form>
-                    </details>
-                  @endcan
-                @endif
+                @include('admin.upcycling.partials.decisions')
                 <a href="{{ route('admin.upcycling.projets.edit', $projet) }}" class="v-btn v-btn--icon v-theme--light text-default v-btn--density-default v-btn--size-small v-btn--variant-text" title="Modifier">
                   <span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
                   <span class="v-btn__content"><i class="bx-edit v-icon notranslate v-theme--light" aria-hidden="true"></i></span>

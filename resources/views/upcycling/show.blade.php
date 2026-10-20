@@ -22,6 +22,8 @@
       <div class="alert alert-warning mt-3 mb-0">Aperçu privé — {{ $projet->statut->label() }}. Seuls l’auteur et l’équipe peuvent le consulter avant publication.</div>
     @endunless
     @include('upcycling.partials.motif-refus')
+    @include('upcycling.partials.flash')
+    @include('upcycling.partials.favori')
 
     <div class="row mt-3 g-4 align-items-center">
       <div class="col-lg-7">
