@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -100,6 +101,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function demandesReparation(): HasMany
     {
         return $this->hasMany(DemandeReparation::class);
+    }
+
+    /**
+     * @return BelongsToMany<ProjetUpcycling, $this>
+     */
+    public function projetsFavoris(): BelongsToMany
+    {
+        return $this->belongsToMany(ProjetUpcycling::class, 'projet_upcycling_favoris', 'user_id', 'projet_upcycling_id')->withTimestamps();
     }
 
     /**

@@ -39,16 +39,11 @@
 </div>
 
 @include('admin.upcycling.partials.flash')
+@include('admin.upcycling.partials.decisions')
 @include('upcycling.partials.assistant-etapes')
 @include('upcycling.partials.assistant-traduction')
 @if ($errors->any())<div role="alert">@foreach($errors->all() as $message)<p>{{ $message }}</p>@endforeach</div>@endif
 @if ($projet->commentaire_refus)<p>Motif du refus : {{ $projet->commentaire_refus }}</p>@endif
-@if ($projet->statut === \App\Enums\Upcycling\StatutProjet::Soumis)
-@can('moderate', $projet)
-<form method="POST" action="{{ route('admin.upcycling.projets.publier', $projet) }}" onsubmit="return confirm('Confirmer la publication de ce projet dans la galerie publique ?')">@csrf<button class="tcu-input" type="submit">Valider et publier</button></form>
-<form method="POST" action="{{ route('admin.upcycling.projets.rejeter', $projet) }}">@csrf<label for="commentaire_refus">Motif du refus (obligatoire)</label><textarea id="commentaire_refus" name="commentaire_refus" required maxlength="2000" class="tcu-input">{{ old('commentaire_refus') }}</textarea><button type="submit">Rejeter le projet</button></form>
-@endcan
-@endif
 @if ($projet->user_id === auth()->id()) @include('upcycling.partials.moderation') @endif
 
 

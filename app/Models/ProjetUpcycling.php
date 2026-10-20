@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,6 +75,11 @@ class ProjetUpcycling extends Model
     public function vetement(): BelongsTo
     {
         return $this->belongsTo(Vetement::class);
+    }
+
+    public function favorisPar(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'projet_upcycling_favoris', 'projet_upcycling_id', 'user_id')->withTimestamps();
     }
 
     public function etapes(): HasMany

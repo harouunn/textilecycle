@@ -6,6 +6,7 @@ use App\Enums\Upcycling\StatutProjet;
 use App\Models\EtapeProjet;
 use App\Models\ProjetUpcycling;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
@@ -171,5 +172,77 @@ class UpcyclingAdminListTest extends TestCase
         $r->assertSeeInOrder($p->etapes->pluck('titre')->all());
         $r->assertSee(route('admin.upcycling.projets.index'), false)->assertSeeText('Upcycling');
         $this->get(route('admin.upcycling.projets.index'))->assertSee(route('admin.upcycling.projets.index'), false);
+    }
+
+    public function test_libelles_confirmation_et_formulaire_csrf_sur_liste_et_fiche(): void
+    {
+        $p = $this->soumis();
+        foreach ([route('admin.upcycling.projets.index'), route('admin.upcycling.projets.show', $p)] as $url) {
+            $r = $this->get($url)->assertOk()
+                ->assertSeeText('Accepter et publier')->assertSeeText('Refuser le projet');
+            $dom = new \DOMDocument;
+            @$dom->loadHTML($r->getContent());
+            $xpath = new \DOMXPath($dom);
+            $publish = $xpath->query('//form[@data-upcycling-publish="'.$p->id.'"]')->item(0);
+            $this->assertNotNull($publish);
+            $this->assertSame('POST', $publish->getAttribute('method'));
+            $this->assertSame("return confirm('Accepter et publier ce projet dans la galerie publique ?')", $publish->getAttribute('onsubmit'));
+            $this->assertSame(1, $xpath->query('.//input[@name="_token"]', $publish)->length);
+            $reject = $xpath->query('//details[@data-upcycling-reject="'.$p->id.'"]/form')->item(0);
+            $this->assertNotNull($reject);
+            $this->assertSame('POST', $reject->getAttribute('method'));
+            $this->assertSame(1, $xpath->query('.//input[@name="_token"]', $reject)->length);
+            $this->assertSame(1, $xpath->query('.//textarea[@name="commentaire_refus" and @required]', $reject)->length);
+            // Afficher les actions sans envoyer le formulaire ne publie rien.
+            $this->assertSame(StatutProjet::Soumis, $p->fresh()->statut);
+        }
+        // Le navigateur envoie ce POST une fois la confirmation acceptee.
+        $this->from(route('admin.upcycling.projets.show', $p))
+            ->post(route('admin.upcycling.projets.publier', $p))->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame(StatutProjet::Publie, $p->fresh()->statut);
+        $this->get(route('upcycling.index'))->assertSeeText($p->titre);
+    }
+
+    public function test_fiche_masque_decisions_pour_tous_statuts_non_soumis(): void
+    {
+        foreach ($this->projets() as $statut => $p) {
+            $r = $this->get(route('admin.upcycling.projets.show', $p))->assertOk();
+            if ($statut === 'soumis') {
+                $r->assertSeeText('Accepter et publier')->assertSeeText('Refuser le projet');
+            } else {
+                $r->assertDontSeeText('Accepter et publier')->assertDontSeeText('Refuser le projet');
+                $r->assertDontSee(route('admin.upcycling.projets.publier', $p), false)
+                    ->assertDontSee(route('admin.upcycling.projets.rejeter', $p), false);
+            }
+        }
+    }
+
+    public function test_decisions_post_uniquement_et_csrf_obligatoire(): void
+    {
+        $p = $this->soumis();
+        // Activer le vrai controle CSRF, normalement ignore par Laravel en test.
+        $this->app->bind(PreventRequestForgery::class,
+            fn ($app) => new class($app, $app['encrypter']) extends PreventRequestForgery
+            {
+                protected function runningUnitTests()
+                {
+                    return false;
+                }
+            });
+        foreach (['publier', 'rejeter'] as $action) {
+            $url = route('admin.upcycling.projets.'.$action, $p);
+            $this->get($url)->assertStatus(405);
+            $this->post($url, ['commentaire_refus' => 'Corrections requises.'])->assertStatus(419);
+            $this->withSession(['_token' => 'jeton-correct'])
+                ->post($url, ['_token' => 'jeton-incorrect', 'commentaire_refus' => 'Corrections requises.'])->assertStatus(419);
+            $this->assertSame(StatutProjet::Soumis, $p->fresh()->statut);
+            $this->assertNull($p->fresh()->commentaire_refus);
+        }
+        $this->withSession(['_token' => 'jeton-correct'])->post(route('admin.upcycling.projets.rejeter', $p), [
+            '_token' => 'jeton-correct', 'commentaire_refus' => 'Corrections requises.',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame(StatutProjet::Rejete, $p->fresh()->statut);
+        $this->assertSame('Corrections requises.', $p->fresh()->commentaire_refus);
+        $this->actingAs($p->user)->get(route('upcycling.mes-projets'))->assertSeeText('Corrections requises.');
     }
 }

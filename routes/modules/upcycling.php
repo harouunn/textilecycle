@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Upcycling\EtapeProjetController as AdminEtapeProj
 use App\Http\Controllers\Admin\Upcycling\ProjetUpcyclingController as AdminProjetUpcyclingController;
 use App\Http\Controllers\Upcycling\AssistantController;
 use App\Http\Controllers\Upcycling\EtapeProjetController;
+use App\Http\Controllers\Upcycling\FavoriController;
 use App\Http\Controllers\Upcycling\GalerieController;
 use App\Http\Controllers\Upcycling\MesProjetsController;
 use App\Http\Controllers\Upcycling\ModerationController;
@@ -25,6 +26,12 @@ use Illuminate\Support\Facades\Route;
 // Front office
 Route::prefix('upcycling')->name('upcycling.')->group(function () {
     Route::get('/', [GalerieController::class, 'index'])->name('index');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('mes-favoris', [FavoriController::class, 'index'])->name('mes-favoris');
+        Route::post('projets/{projet}/favori', [FavoriController::class, 'store'])->name('favoris.store');
+        Route::delete('projets/{projet}/favori', [FavoriController::class, 'destroy'])->name('favoris.destroy');
+    });
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('ia/projet', [AssistantController::class, 'projet'])->middleware('throttle:10,1')->name('ia.projet');
