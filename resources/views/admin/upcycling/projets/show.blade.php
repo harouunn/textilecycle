@@ -39,6 +39,18 @@
 </div>
 
 @include('admin.upcycling.partials.flash')
+@include('upcycling.partials.assistant-etapes')
+@include('upcycling.partials.assistant-traduction')
+@if ($errors->any())<div role="alert">@foreach($errors->all() as $message)<p>{{ $message }}</p>@endforeach</div>@endif
+@if ($projet->commentaire_refus)<p>Motif du refus : {{ $projet->commentaire_refus }}</p>@endif
+@if ($projet->statut === \App\Enums\Upcycling\StatutProjet::Soumis)
+@can('moderate', $projet)
+<form method="POST" action="{{ route('admin.upcycling.projets.publier', $projet) }}" onsubmit="return confirm('Confirmer la publication de ce projet dans la galerie publique ?')">@csrf<button class="tcu-input" type="submit">Valider et publier</button></form>
+<form method="POST" action="{{ route('admin.upcycling.projets.rejeter', $projet) }}">@csrf<label for="commentaire_refus">Motif du refus (obligatoire)</label><textarea id="commentaire_refus" name="commentaire_refus" required maxlength="2000" class="tcu-input">{{ old('commentaire_refus') }}</textarea><button type="submit">Rejeter le projet</button></form>
+@endcan
+@endif
+@if ($projet->user_id === auth()->id()) @include('upcycling.partials.moderation') @endif
+
 
 <div class="v-row">
   {{-- Détails --}}
@@ -114,6 +126,7 @@
           <div class="flex-grow-1">
             <h6 class="text-h6 mb-1">{{ $etape->titre }}</h6>
             <p class="mb-0 tcu-pre">{{ $etape->contenu }}</p>
+@include('upcycling.partials.details-etape')
           </div>
           @if ($etape->photoUrl())
             <img src="{{ $etape->photoUrl() }}" alt="Photo de l'étape {{ $etape->numero }}" class="tcu-thumb flex-shrink-0">

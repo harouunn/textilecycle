@@ -7,14 +7,14 @@ use App\Models\EtapeProjet;
 use App\Models\ProjetUpcycling;
 use App\Models\User;
 use Database\Seeders\UpcyclingSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\UpcyclingDatabase;
 use Tests\TestCase;
 
 class UpcyclingTest extends TestCase
 {
-    use RefreshDatabase;
+    use UpcyclingDatabase;
 
     protected function setUp(): void
     {
@@ -182,7 +182,7 @@ class UpcyclingTest extends TestCase
 
         $this->actingAs($admin)->post(route('admin.upcycling.projets.store'), $this->donneesProjet())->assertRedirect();
         $projet = ProjetUpcycling::firstOrFail();
-        $this->assertSame(StatutProjet::Publie, $projet->statut);
+        $this->assertSame(StatutProjet::Brouillon, $projet->statut);
 
         $this->actingAs($admin)->post(route('admin.upcycling.projets.etapes.store', $projet), [
             'numero' => 1, 'titre' => 'Découper', 'contenu' => 'Découpez les jambes du jean.',

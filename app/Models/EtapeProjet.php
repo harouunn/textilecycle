@@ -21,12 +21,17 @@ class EtapeProjet extends Model
         'titre',
         'contenu',
         'photo',
+        'outils_necessaires',
+        'duree_minutes',
+        'conseils_securite',
     ];
 
     protected function casts(): array
     {
         return [
             'numero' => 'integer',
+            'duree_minutes' => 'integer',
+            'traductions' => 'array',
         ];
     }
 

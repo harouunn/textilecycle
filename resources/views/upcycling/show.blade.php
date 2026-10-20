@@ -4,14 +4,24 @@
 
 @section('content')
 @include('upcycling.partials.styles')
+<nav aria-label="Langue du projet" class="container my-3">
+  <a href="{{ route('upcycling.projets.show',$projet) }}">Version originale</a>
+  @foreach ($traductionsDisponibles as $code=>$traduction)
+    <a href="{{ route('upcycling.projets.show',[$projet,'langue'=>$code]) }}" @if($langueAffichee === $code) aria-current="page" @endif>{{ ['fr'=>'Français','ar'=>'العربية','en'=>'English'][$code] }}</a>
+  @endforeach
+  @if ($langueAffichee)<p>Traduction assistée par IA, validée par l’auteur.</p>@endif
+</nav>
+<div @if($langueAffichee) lang="{{ $langueAffichee }}" @endif dir="{{ $langueAffichee === 'ar' ? 'rtl' : 'ltr' }}">
+
 
 <section class="bg-light py-5">
   <div class="container">
     <a href="{{ route('upcycling.index') }}" class="item-anchor small text-uppercase">← Tous les projets</a>
 
     @unless ($projet->estPublie())
-      <div class="alert alert-warning mt-3 mb-0">Aperçu : ce projet est en brouillon et n'est visible que par vous. Il sera publié après validation par l'équipe TexTileCycle.</div>
+      <div class="alert alert-warning mt-3 mb-0">Aperçu privé — {{ $projet->statut->label() }}. Seuls l’auteur et l’équipe peuvent le consulter avant publication.</div>
     @endunless
+    @include('upcycling.partials.motif-refus')
 
     <div class="row mt-3 g-4 align-items-center">
       <div class="col-lg-7">
@@ -76,6 +86,7 @@
             <div class="flex-grow-1">
               <h3 class="h5 text-uppercase mb-2">{{ $etape->titre }}</h3>
               <p class="tcu-pre mb-0">{{ $etape->contenu }}</p>
+@include('upcycling.partials.details-etape')
               @if ($etape->photoUrl())
                 <img src="{{ $etape->photoUrl() }}" alt="Étape {{ $etape->numero }} : {{ $etape->titre }}" class="tcu-etape-photo mt-3">
               @endif
@@ -95,4 +106,5 @@
     @endcan
   </div>
 </section>
+</div>
 @endsection

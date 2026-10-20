@@ -22,11 +22,21 @@
   <div class="container">
     @include('upcycling.partials.flash')
 
+    <form method="GET" action="{{ route('upcycling.index') }}" class="border rounded p-4 mb-4">
+      <h2 class="h5">Trouver une idée avec la recherche assistée</h2>
+      <label for="recherche-idee">Décrivez votre vêtement et votre idée</label>
+      <textarea id="recherche-idee" name="idee" maxlength="2000" class="form-control" placeholder="J’ai un vieux jean et je veux créer un sac facile.">{{ $idee }}</textarea>
+      @if ($difficulteActive)<input type="hidden" name="difficulte" value="{{ $difficulteActive }}">@endif
+      <button type="submit" class="btn btn-dark mt-2">Trouver des projets similaires</button>
+      <a href="{{ route('upcycling.index') }}">Effacer la recherche</a>
+      <p class="small mt-2">Compare votre idée aux tutoriels publiés. Fonctionne localement, sans clé API.</p>
+      @error('idee')<p role="alert">{{ $message }}</p>@enderror
+    </form>
     {{-- Filtre par difficulté --}}
     <div class="tcu-filtres d-flex flex-wrap justify-content-center gap-2 mb-5" role="group" aria-label="Filtrer par difficulté">
-      <a href="{{ route('upcycling.index') }}" @class(['btn', 'btn-dark' => ! $difficulteActive, 'btn-outline-dark' => $difficulteActive])>Tous</a>
+      <a href="{{ route('upcycling.index', ['idee' => $idee]) }}" @class(['btn', 'btn-dark' => ! $difficulteActive, 'btn-outline-dark' => $difficulteActive])>Tous</a>
       @foreach ($difficultes as $valeur => $libelle)
-        <a href="{{ route('upcycling.index', ['difficulte' => $valeur]) }}"
+        <a href="{{ route('upcycling.index', ['difficulte' => $valeur, 'idee' => $idee]) }}"
           @class(['btn', 'btn-dark' => $difficulteActive === $valeur, 'btn-outline-dark' => $difficulteActive !== $valeur])>{{ $libelle }}</a>
       @endforeach
     </div>
@@ -61,7 +71,7 @@
         </div>
       @empty
         <div class="col-12 text-center py-5">
-          <p class="mb-0">Aucun projet {{ $difficulteActive ? 'de cette difficulté ' : '' }}n'est publié pour le moment.</p>
+          <p class="mb-0">{{ $idee ? "Aucune correspondance. Essayez un vêtement, un résultat ou une difficulté différents." : "" }}</p><p class="mb-0" @if($idee) hidden @endif>Aucun projet {{ $difficulteActive ? 'de cette difficulté ' : '' }}n'est publié pour le moment.</p>
         </div>
       @endforelse
     </div>

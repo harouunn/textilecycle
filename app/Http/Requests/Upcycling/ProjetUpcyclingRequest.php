@@ -18,7 +18,7 @@ class ProjetUpcyclingRequest extends UpcyclingRequest
             return $this->user()?->can('update', $projet) ?? false;
         }
 
-        return $this->user() !== null;
+        return $this->user() !== null && (! $this->routeIs('admin.*') || $this->user()->isAdmin());
     }
 
     public function rules(): array
@@ -69,7 +69,7 @@ class ProjetUpcyclingRequest extends UpcyclingRequest
             'materiel_necessaire.max' => 'Le matériel nécessaire ne peut pas dépasser :max caractères.',
             'photo_avant.max' => 'L’image ne doit pas dépasser 2 Mo.',
             'photo_apres.max' => 'L’image ne doit pas dépasser 2 Mo.',
-            'statut.enum' => 'Le statut doit être brouillon ou publié.',
+            'statut.enum' => 'Le statut doit être brouillon, soumis, publie ou rejete.',
         ];
     }
 
@@ -83,9 +83,8 @@ class ProjetUpcyclingRequest extends UpcyclingRequest
     {
         // Les fichiers sont gérés avec l’enregistrement, après validation complète.
         $except = ['photo_avant', 'photo_apres'];
-        if ($this->routeIs('upcycling.*')) {
-            $except[] = 'statut';
-        }
+        // Les transitions passent exclusivement par la soumission et la modération.
+        $except[] = 'statut';
 
         return $this->safe()->except($except);
     }

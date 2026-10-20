@@ -18,6 +18,9 @@
         </p>
 
         @include('upcycling.partials.flash')
+        @include('upcycling.partials.moderation')
+        @include('upcycling.partials.assistant-etapes')
+        @include('upcycling.partials.assistant-traduction')
 
         <div class="bg-white border mb-4">
           @forelse ($projet->etapes as $etape)
@@ -26,6 +29,7 @@
               <div class="flex-grow-1">
                 <h2 class="h6 text-uppercase mb-1">{{ $etape->titre }}</h2>
                 <p class="tcu-pre mb-0">{{ $etape->contenu }}</p>
+@include('upcycling.partials.details-etape')
               </div>
               @if ($etape->photoUrl())
                 <img src="{{ $etape->photoUrl() }}" alt="Photo de l'étape {{ $etape->numero }}" class="tcu-thumb flex-shrink-0">

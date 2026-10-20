@@ -2,6 +2,7 @@
     $formErrors = $errors->getBag('projet');
     $formOld = fn ($field, $default = null) => $formErrors->any() ? old($field, $default) : $default;
 @endphp
+@include('upcycling.partials.assistant-projet')
 <p class="form-text">* Champs obligatoires</p>
 {{-- Champs du projet (front office). Variables : $projet, $difficultes --}}
 <div class="row g-3">

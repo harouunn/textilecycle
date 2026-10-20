@@ -1,0 +1,12 @@
+.tc-ai-assistant{--tc-ai-accent:#346c45;background:#fff;color:#29352d;border:1px solid #dce5de!important;border-radius:12px;padding:24px!important;margin:24px 0;font-size:15px;line-height:1.6}
+.tc-ai-assistant h2{font-size:20px;font-weight:650;margin:0 0 12px}.tc-ai-assistant h3{font-size:17px;margin:16px 0 10px}.tc-ai-assistant p{margin:10px 0}.tc-ai-assistant label,.tc-ai-fields label{display:block;width:100%;margin:12px 0 6px;font-weight:500}
+.tc-ai-assistant textarea,.tc-ai-assistant select,.tc-ai-assistant input:not([type=checkbox]):not([type=hidden]){display:block;width:100%;border:1px solid #cbd5ce;border-radius:7px;padding:10px 12px;margin-top:6px;background:#fff;color:#263a2d;font:inherit;box-sizing:border-box}
+.tc-ai-assistant textarea{min-height:80px;resize:vertical}.tc-ai-assistant input[type=checkbox]{width:18px;height:18px;vertical-align:middle;margin-right:6px}
+.tc-ai-assistant button{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--tc-ai-accent);border-radius:7px;background:var(--tc-ai-accent);color:#fff;padding:10px 15px;margin:8px 8px 8px 0;font:inherit;font-weight:600;cursor:pointer;line-height:1.4}
+.tc-ai-assistant button:disabled{opacity:.55;cursor:wait}.tc-ai-assistant button[data-ai-remove]{color:#9c3434;background:#fff;border-color:#d6b4b4;padding:6px 10px;font-size:13px}
+.tc-ai-assistant button:focus-visible,.tc-ai-assistant input:focus-visible,.tc-ai-assistant textarea:focus-visible,.tc-ai-assistant select:focus-visible{outline:3px solid #95bca0;outline-offset:2px}
+.tc-ai-assistant fieldset{border:1px solid #dce5de;border-radius:8px;padding:18px;margin:18px 0;background:#fafcfb}.tc-ai-assistant legend{float:none;width:auto;font-weight:650;font-size:16px;padding:0 6px}
+.tc-ai-assistant [data-ai-step-fields]{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.tc-ai-assistant [data-ai-field=contenu],.tc-ai-assistant [data-ai-field=outils_necessaires],.tc-ai-assistant [data-ai-field=conseils_securite],.tc-ai-assistant [data-ai-field=photo]{grid-column:1/-1}
+.tc-ai-assistant dt{font-weight:650;margin-top:10px}.tc-ai-assistant dd{margin:0 0 10px;white-space:pre-wrap}.tc-ai-assistant [data-ai-message]:not(:empty){padding:10px 12px;border-radius:6px;background:#eff5f0}
+.tc-ai-assistant [hidden]{display:none!important}.tc-ai-fields textarea,.tc-ai-fields input{width:100%}
+@media(max-width:640px){.tc-ai-assistant{padding:16px!important}.tc-ai-assistant [data-ai-step-fields]{grid-template-columns:1fr}.tc-ai-assistant button{max-width:100%;white-space:normal}}

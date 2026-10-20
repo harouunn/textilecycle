@@ -44,6 +44,9 @@ class ProjetUpcycling extends Model
             'difficulte' => Difficulte::class,
             'statut' => StatutProjet::class,
             'duree_minutes' => 'integer',
+            'soumis_le' => 'datetime',
+            'decision_le' => 'datetime',
+            'traductions' => 'array',
         ];
     }
 
