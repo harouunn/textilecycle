@@ -17,6 +17,10 @@
         </p>
 
         @include('upcycling.partials.flash')
+        @include('upcycling.partials.motif-refus')
+        @if ($projet->estPublie() || $projet->statut === \App\Enums\Upcycling\StatutProjet::Soumis)
+          <p class="alert alert-info">Toute modification remet ce projet en brouillon. Soumettez-le à nouveau pour validation.</p>
+        @endif
 
         <form method="POST" action="{{ route('upcycling.projets.update', $projet) }}" enctype="multipart/form-data" class="tcu-form bg-white border p-4 p-md-5" data-upcycling-form>
           @csrf

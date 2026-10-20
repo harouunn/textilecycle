@@ -39,3 +39,5 @@
 </div>
 
 @include('upcycling.partials.validation-browser')
+
+@include('upcycling.partials.champs-etape-assistance')

@@ -22,7 +22,7 @@ class EtapeProjetRequest extends UpcyclingRequest
             abort_unless($etape->projet_upcycling_id === $projet->id, 404);
         }
 
-        return $this->user() !== null;
+        return $this->user() !== null && (! $this->routeIs('admin.*') || $this->user()->isAdmin());
     }
 
     protected function prepareForValidation(): void
@@ -44,6 +44,9 @@ class EtapeProjetRequest extends UpcyclingRequest
             'titre' => ['bail', 'required', 'string', 'min:3', 'max:150'],
             'contenu' => ['bail', 'required', 'string', 'min:10', 'max:5000'],
             'photo' => $this->reglesPhoto($etape, 'photo'),
+            'outils_necessaires' => ['nullable', 'string', 'max:2000'],
+            'duree_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
+            'conseils_securite' => ['nullable', 'string', 'max:2000'],
         ];
     }
 

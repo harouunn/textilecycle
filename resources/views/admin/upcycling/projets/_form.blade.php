@@ -2,6 +2,7 @@
     $formErrors = $errors->getBag('projet');
     $formOld = fn ($field, $default = null) => $formErrors->any() ? old($field, $default) : $default;
 @endphp
+@include('upcycling.partials.assistant-projet')
 <p class="tcu-help">* Champs obligatoires</p>
 {{-- Champs du projet (création et modification). Variables : $projet, $difficultes, $statuts --}}
 <div class="v-row">
@@ -14,11 +15,8 @@
 
   <div class="v-col-md-4 v-col-12">
     <label for="statut" class="tcu-label">Statut <span class="text-error">*</span></label>
-    <select id="statut" name="statut" required @class(['tcu-input', 'is-invalid' => $formErrors->has('statut')]) aria-invalid="{{ $formErrors->has('statut') ? 'true' : 'false' }}">
-      @foreach ($statuts as $valeur => $libelle)
-        <option value="{{ $valeur }}" @selected($formOld('statut', $projet->statut?->value ?? 'brouillon') === $valeur)>{{ $libelle }}</option>
-      @endforeach
-    </select>
+    <input type="hidden" name="statut" value="brouillon">
+    <p>La publication se fait après soumission, depuis la fiche du projet.</p>
     @error('statut', 'projet') <div data-server-error class="tcu-error">{{ $message }}</div> @enderror
   </div>
 

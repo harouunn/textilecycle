@@ -8,7 +8,6 @@ use App\Models\ProjetUpcycling;
 use App\Models\User;
 use App\Services\Upcycling\EnregistrerAvecPhotos;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -16,11 +15,12 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
+use Tests\Concerns\UpcyclingDatabase;
 use Tests\TestCase;
 
 class UpcyclingValidationTest extends TestCase
 {
-    use RefreshDatabase;
+    use UpcyclingDatabase;
 
     protected function setUp(): void
     {
@@ -178,7 +178,7 @@ class UpcyclingValidationTest extends TestCase
         $this->post(route($office.'.projets.store'), $this->projetData())->assertSessionHasNoErrors()->assertRedirect();
         $p = ProjetUpcycling::firstOrFail();
         $this->assertSame($u->id, $p->user_id);
-        $this->assertSame($office === 'upcycling' ? StatutProjet::Brouillon : StatutProjet::Publie, $p->statut);
+        $this->assertSame(StatutProjet::Brouillon, $p->statut);
         Storage::disk('public')->assertExists([$p->photo_avant, $p->photo_apres]);
         $paths = [$p->photo_avant, $p->photo_apres];
         $data = $this->projetData();

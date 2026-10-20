@@ -7,7 +7,9 @@ use App\Http\Requests\Upcycling\EtapeProjetRequest;
 use App\Models\EtapeProjet;
 use App\Models\ProjetUpcycling;
 use App\Services\Upcycling\EnregistrerAvecPhotos;
+use App\Services\Upcycling\ModerationProjet;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -62,7 +64,10 @@ class EtapeProjetController extends Controller
     {
         $this->autoriser($projet, $etape);
 
-        $etape->delete();
+        DB::transaction(function () use ($projet, $etape) {
+            ModerationProjet::remettreEnBrouillon($projet->newQuery()->lockForUpdate()->findOrFail($projet->id));
+            $etape->delete();
+        });
 
         return redirect()
             ->route('upcycling.projets.etapes.index', $projet)

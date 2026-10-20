@@ -45,7 +45,9 @@
                 <td>@include('upcycling.partials.badge', ['enum' => $projet->difficulte])</td>
                 <td class="text-nowrap">{{ $projet->dureeFormatee() }}</td>
                 <td class="text-center">{{ $projet->etapes_count }}</td>
-                <td>@include('upcycling.partials.badge', ['enum' => $projet->statut])</td>
+                <td>@include('upcycling.partials.badge', ['enum' => $projet->statut])
+@include('upcycling.partials.moderation')
+</td>
                 <td class="text-end pe-4 text-nowrap">
                   <a href="{{ route('upcycling.projets.etapes.index', $projet) }}" class="btn btn-sm btn-outline-dark">Étapes</a>
                   <a href="{{ route('upcycling.projets.edit', $projet) }}" class="btn btn-sm btn-outline-dark">Modifier</a>
