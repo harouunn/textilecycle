@@ -30,3 +30,9 @@
   'href' => route('admin.depot.categories.index'),
   'active' => request()->routeIs('admin.depot.categories.*'),
 ])
+@include('partials.back.nav-link', [
+  'title' => 'Statistiques du dépôt',
+  'icon' => 'bx-bar-chart-alt-2',
+  'href' => route('admin.depot.statistiques'),
+  'active' => request()->routeIs('admin.depot.statistiques*'),
+])

@@ -32,8 +32,9 @@
       <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
         @class(['form-control w-auto flex-grow-1', 'is-invalid' => $errors->has('photo')])>
       @isset($analyseRoute)
-        <button type="submit" formaction="{{ route($analyseRoute) }}" formnovalidate class="tc-btn tc-btn--clair">
-          <x-ui.icone nom="etincelle" /> Analyser la photo
+        <button type="submit" formaction="{{ route($analyseRoute) }}" formnovalidate class="tc-btn tc-btn--clair"
+          onclick="this.querySelector('span').textContent = 'Analyse par l’IA en cours…'; this.setAttribute('aria-busy', 'true')">
+          <x-ui.icone nom="etincelle" /> <span>Analyser la photo</span>
         </button>
       @endisset
     </div>
@@ -46,7 +47,7 @@
       @elseif ($photoAnalysee)
         Photo analysée : elle sera utilisée si vous n'en choisissez pas une autre.
       @elseif (isset($analyseRoute))
-        Indiquez le titre, choisissez la photo puis « Analyser » : catégorie, matière, état et description sont proposés automatiquement.
+        Indiquez le titre, choisissez la photo puis « Analyser » : notre IA de vision (Ollama, sur notre serveur) regarde la photo et propose catégorie, matière, état et description.
       @endif
     </div>
   </div>

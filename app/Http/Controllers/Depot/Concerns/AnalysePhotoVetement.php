@@ -28,7 +28,7 @@ trait AnalysePhotoVetement
         app(OptimiseurPhoto::class)->optimiser($chemin);
         $request->session()->put(Vetement::SESSION_PHOTO_ANALYSEE, $chemin);
 
-        // L'IA Claude d'abord (si une clé est configurée), sinon l'analyse locale sans IA.
+        // L'IA locale Ollama d'abord (vision), sinon l'analyse locale sans IA (couleurs + mots-clés du titre).
         $categories = Categorie::query()->actives()->get();
         $classement = app(ClassificateurIA::class)->classer(ClassificateurIA::imageAEnvoyer($chemin), $request->validated('titre'), $categories)
             ?? app(ClassificateurVetement::class)->classer(Storage::disk('public')->path($chemin), $request->validated('titre'), $categories);

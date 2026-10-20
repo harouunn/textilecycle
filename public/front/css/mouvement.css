@@ -1,0 +1,111 @@
+/* =============================================================================
+   TexTileCycle — design en mouvement (site public)
+   Mosaïque de photos défilantes, titre révélé mot par mot, bandeau défilant,
+   apparitions au défilement, compteurs, cartes 3D, boutons magnétiques,
+   transitions entre pages. Tout est désactivé si le système demande
+   de réduire les animations (prefers-reduced-motion).
+   ============================================================================= */
+
+/* Transitions douces entre les pages (View Transitions API, navigateurs récents) */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: tc-sortie .25s ease both; }
+::view-transition-new(root) { animation: tc-entree .35s ease both; }
+@keyframes tc-sortie { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes tc-entree { from { opacity: 0; transform: translateY(12px); } }
+
+/* Barre de progression de lecture */
+.tc-progression { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 1100; pointer-events: none;
+  background: linear-gradient(90deg, #3d7a4f, #9fd3ae, #d08c3c); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* ----- Bannière d'accueil : texte à gauche, mosaïque de photos qui défilent à droite ----- */
+.tc-hero-mouvement { position: relative; overflow: hidden; background: #f3f0e8; min-height: min(92vh, 860px); display: flex; align-items: center; }
+.tc-hero-mouvement::before { content: ""; position: absolute; inset: -20%; z-index: 0; opacity: .55;
+  background: radial-gradient(40% 35% at 20% 30%, #dfeee2 0%, transparent 70%), radial-gradient(35% 40% at 80% 70%, #f4dcc4 0%, transparent 70%);
+  animation: tc-halo 18s ease-in-out infinite alternate; }
+@keyframes tc-halo { to { transform: translate(4%, -3%) rotate(6deg) scale(1.08); } }
+.tc-hero-mouvement > .container { position: relative; z-index: 1; }
+.tc-hero-titre { font-family: "Marcellus", serif; font-size: clamp(2.6rem, 6.2vw, 5.6rem); line-height: 1.02; color: var(--tc-encre); letter-spacing: -.01em; margin: 1rem 0 1.5rem; }
+.tc-hero-titre .mot { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; }
+.tc-hero-titre .mot > span { display: inline-block; transform: translateY(110%); animation: tc-mot .9s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(var(--i) * 90ms + 150ms); }
+.tc-hero-titre em { font-style: italic; color: var(--tc-vert); }
+@keyframes tc-mot { to { transform: none; } }
+.tc-hero-texte { max-width: 470px; font-size: 1.1rem; opacity: 0; animation: tc-fondu .8s ease .8s forwards; }
+.tc-hero-actions { opacity: 0; animation: tc-fondu .8s ease 1s forwards; }
+@keyframes tc-fondu { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.tc-hero-pastilles { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2.5rem; opacity: 0; animation: tc-fondu .8s ease 1.2s forwards; }
+.tc-hero-pastilles strong { display: block; font-family: "Marcellus", serif; font-size: 1.8rem; color: var(--tc-encre); line-height: 1; }
+.tc-hero-pastilles span { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+
+.tc-mosaique { position: relative; height: min(88vh, 820px); display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; transform: rotate(-6deg) scale(1.12);
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent); }
+.tc-mosaique__colonne { overflow: hidden; }
+.tc-mosaique__piste { display: flex; flex-direction: column; gap: 14px; animation: tc-defile-haut 38s linear infinite; }
+.tc-mosaique__colonne:nth-child(2) .tc-mosaique__piste { animation-name: tc-defile-bas; animation-duration: 46s; }
+.tc-mosaique__colonne:nth-child(3) .tc-mosaique__piste { animation-duration: 42s; }
+.tc-mosaique:hover .tc-mosaique__piste { animation-play-state: paused; }
+.tc-mosaique img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 4px; box-shadow: 0 12px 30px rgba(28, 31, 29, .14); transition: transform .5s ease, filter .5s ease; }
+.tc-mosaique a:hover img { transform: scale(1.04); filter: saturate(1.15); }
+@keyframes tc-defile-haut { to { transform: translateY(-50%); } }
+@keyframes tc-defile-bas { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+
+/* ----- Bandeau de texte défilant ----- */
+.tc-defilant { overflow: hidden; background: var(--tc-encre); color: #fff; padding: 1.1rem 0; border-block: 1px solid #000; }
+.tc-defilant__piste { display: flex; width: max-content; animation: tc-defile-gauche 28s linear infinite; }
+.tc-defilant:hover .tc-defilant__piste { animation-play-state: paused; }
+.tc-defilant span { font-family: "Marcellus", serif; font-size: clamp(1.4rem, 3vw, 2.3rem); text-transform: uppercase; letter-spacing: .04em; padding-inline: 1.6rem; white-space: nowrap; }
+.tc-defilant span:nth-child(even) { color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, .75); }
+.tc-defilant i { color: #9fd3ae; font-style: normal; }
+@keyframes tc-defile-gauche { to { transform: translateX(-50%); } }
+
+/* ----- Apparitions au défilement (activées par mouvement.js) ----- */
+.tc-js [data-revele] { opacity: 0; transform: translateY(36px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .8, .2, 1); transition-delay: calc(var(--rang, 0) * 90ms); }
+.tc-js [data-revele="image"] { opacity: 1; transform: none; clip-path: inset(0 0 100% 0); transition: clip-path 1.1s cubic-bezier(.7, 0, .2, 1); transition-delay: calc(var(--rang, 0) * 90ms); }
+.tc-js [data-revele].visible { opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+
+/* ----- Bandeau d'impact : dégradé animé + compteurs ----- */
+.tc-bandeau-impact { background: linear-gradient(120deg, #1c1f1d, #24453a, #1c1f1d, #3b2f24); background-size: 300% 300%; animation: tc-degrade 16s ease infinite; }
+@keyframes tc-degrade { 50% { background-position: 100% 50%; } }
+
+/* ----- Cartes : inclinaison 3D et zoom lent ----- */
+.tc-produit, .tc-cycle-carte { transform-style: preserve-3d; will-change: transform; }
+.tc-js .tc-produit { transition: transform .25s ease; }
+.tc-produit__image img { transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); }
+.tc-produit:hover .tc-produit__image img { transform: scale(1.08); }
+.tc-produit__image::after { content: "Voir le vêtement"; position: absolute; left: 0; right: 0; bottom: 0; padding: .8rem; text-align: center;
+  background: rgba(28, 31, 29, .88); color: #fff; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; transform: translateY(100%); transition: transform .35s ease; }
+.tc-produit:hover .tc-produit__image::after { transform: none; }
+.tc-cycle-carte { position: relative; overflow: hidden; }
+.tc-cycle-carte::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, var(--tc-vert-pale), transparent 60%); opacity: 0; transition: opacity .4s; }
+.tc-cycle-carte:hover::before { opacity: 1; }
+.tc-cycle-carte > * { position: relative; }
+
+/* ----- Boutons magnétiques ----- */
+.tc-btn { transition: background .15s, color .15s, border-color .15s, transform .2s cubic-bezier(.2, .8, .2, 1); }
+
+/* ----- Images en parallaxe ----- */
+[data-parallaxe] { will-change: transform; }
+
+@media (max-width: 991.98px) {
+  .tc-hero-mouvement { min-height: auto; padding: 3rem 0 0; }
+  .tc-mosaique { height: 420px; margin-top: 2.5rem; transform: rotate(-4deg) scale(1.05); }
+}
+
+/* Accessibilité : aucune animation si l'utilisateur l'a demandé au système */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .tc-hero-titre .mot > span, .tc-hero-texte, .tc-hero-actions, .tc-hero-pastilles { transform: none !important; opacity: 1 !important; }
+  .tc-js [data-revele] { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+  @view-transition { navigation: none; }
+}
+
+/* En-têtes de toutes les pages : apparition douce du titre et du texte */
+.tc-hero .tc-fil, .tc-hero .tc-surtitre, .tc-hero h1, .tc-hero p, .tc-hero .d-flex.gap-2 { animation: tc-fondu .7s cubic-bezier(.2, .8, .2, 1) both; }
+.tc-hero h1 { animation-delay: .08s; }
+.tc-hero p { animation-delay: .16s; }
+.tc-hero .d-flex.gap-2 { animation-delay: .24s; }
+
+/* Chiffres : police Jost (dans Marcellus, « 1 » ressemble à « I ») */
+.tc-hero-pastilles strong, .tc-cycle-carte__chiffre strong, .tc-stat__valeur, .tc-cycle-carte__numero {
+  font-family: "Jost", sans-serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+}
+.tc-cycle-carte__numero { font-weight: 300; }

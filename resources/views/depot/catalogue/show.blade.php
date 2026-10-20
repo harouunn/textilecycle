@@ -88,7 +88,7 @@
             <h2 style="font-family: 'Marcellus', serif;" class="mb-4">Vous aimerez aussi</h2>
             <div class="row g-4">
               @foreach ($similaires as $similaire)
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-3" data-revele>
                   <x-depot.carte-vetement :vetement="$similaire" />
                 </div>
               @endforeach

@@ -1,0 +1,163 @@
+/* =============================================================================
+   TexTileCycle — thème « éco premium » (chargé en dernier, s'applique à tout le site public)
+   Vert forêt profond, crème chaude, accent vert citron, angles arrondis, boutons pilule.
+   ============================================================================= */
+:root {
+  --tc-foret: #0e2318; --tc-foret-2: #173a28; --tc-citron: #c8f169; --tc-citron-fonce: #a9d64a; --tc-terre: #d77a4d;
+  --tc-encre: #10241a; --tc-sable: #f5efe3; --tc-ligne: #e4dccb; --tc-vert-pale: #e6f1df;
+  --tc-rayon: 20px; --tc-rayon-petit: 12px;
+  --tc-ombre: 0 2px 6px rgba(14, 35, 24, .05), 0 18px 40px -12px rgba(14, 35, 24, .18);
+}
+body { background: #fbf8f2; }
+::selection { background: var(--tc-citron); color: var(--tc-foret); }
+
+/* ----- Boutons pilule avec remplissage animé ----- */
+.tc-btn, .btn-dark, .btn-outline-dark, .btn-common {
+  position: relative; overflow: hidden; isolation: isolate; border-radius: 999px !important;
+  padding: .85rem 1.6rem; font-weight: 500; letter-spacing: .08em;
+}
+.tc-btn::before, .btn-dark::before, .btn-outline-dark::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+  background: var(--tc-citron); transform: translateY(101%); transition: transform .45s cubic-bezier(.7, 0, .2, 1);
+}
+.tc-btn:hover::before, .btn-dark:hover::before, .btn-outline-dark:hover::before { transform: none; }
+.tc-btn, .btn-dark { background: var(--tc-foret); border: 1px solid var(--tc-foret); color: #fff; }
+.tc-btn:hover, .btn-dark:hover { background: var(--tc-foret); border-color: var(--tc-citron); color: var(--tc-foret); }
+.tc-btn--clair, .btn-outline-dark { background: transparent; border: 1px solid currentColor; color: var(--tc-foret); }
+.tc-btn--clair:hover, .btn-outline-dark:hover { background: transparent; color: var(--tc-foret); border-color: var(--tc-citron); }
+.tc-btn--vert { background: var(--tc-citron); border-color: var(--tc-citron); color: var(--tc-foret); }
+.tc-btn--vert::before { background: var(--tc-foret); }
+.tc-btn--vert:hover { background: var(--tc-citron); border-color: var(--tc-foret); color: #fff; }
+.tc-btn--danger { border-color: #e3bdb8; color: var(--tc-erreur); background: transparent; }
+.tc-btn--danger::before { background: var(--tc-erreur); }
+.tc-btn--danger:hover { color: #fff; background: transparent; border-color: var(--tc-erreur); }
+.tc-btn--petit { padding: .5rem 1rem; }
+.tc-btn svg { transition: transform .3s ease; }
+.tc-btn:hover svg:last-child { transform: translateX(3px); }
+
+/* ----- Cartes, champs, badges, images arrondis ----- */
+.tc-carte, .tc-stat, .tc-cycle-carte, .tc-vide, .tc-attributs, .tc-alerte, .tc-auth__carte, .tc-association { border-radius: var(--tc-rayon); }
+.tc-carte--ombre, .tc-carte { box-shadow: var(--tc-ombre); border-color: transparent; }
+.tc-stat__icone { border-radius: 14px; }
+.tc-attributs { overflow: hidden; }
+.tc-form .form-control, .tc-form .form-select, .form-control, .form-select { border-radius: var(--tc-rayon-petit) !important; }
+.tc-badge { border-radius: 999px; }
+.tc-pastille i { box-shadow: 0 0 0 3px rgba(255, 255, 255, .6); }
+.tc-produit__image, .tc-fiche__photo, .tc-vignette, .tc-qr { border-radius: var(--tc-rayon); overflow: hidden; }
+.tc-produit__cat { border-radius: 999px; backdrop-filter: blur(8px); background: rgba(255, 255, 255, .85); }
+.tc-produit__image::after { border-radius: 0 0 var(--tc-rayon) var(--tc-rayon); background: var(--tc-citron); color: var(--tc-foret); font-weight: 500; }
+.tc-tailles label, .tc-choix label, .tc-puce-filtre { border-radius: 999px; }
+.tc-choix label { border-radius: var(--tc-rayon-petit); }
+.tc-section-form > h3 span, .tc-numeros li::before { border-radius: 50%; }
+
+/* ----- Barre de navigation en verre dépoli, collée en haut ----- */
+nav.navbar { position: sticky; top: 0; z-index: 1030; background: rgba(251, 248, 242, .78) !important; backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px); border-bottom: 1px solid rgba(14, 35, 24, .06) !important; transition: padding .3s ease, box-shadow .3s ease; }
+nav.navbar.tc-nav-reduite { padding-top: .45rem !important; padding-bottom: .45rem !important; box-shadow: 0 10px 30px -18px rgba(14, 35, 24, .35); }
+nav.navbar .nav-link { position: relative; color: var(--tc-encre); font-size: .82rem; letter-spacing: .1em; }
+nav.navbar .nav-link::after { content: ""; position: absolute; left: .5rem; right: .5rem; bottom: .1rem; height: 2px; border-radius: 2px; background: var(--tc-citron-fonce); transform: scaleX(0); transition: transform .3s ease; }
+nav.navbar .nav-link:hover::after, nav.navbar .nav-link.active::after { transform: scaleX(1); }
+nav.navbar .btn-outline-dark { padding: .55rem 1.2rem; font-size: .78rem; background: var(--tc-foret); color: #fff; border-color: var(--tc-foret); }
+nav.navbar .btn-outline-dark:hover { color: var(--tc-foret); }
+.dropdown-menu { border-radius: var(--tc-rayon-petit); box-shadow: var(--tc-ombre); padding: .5rem; }
+.dropdown-item { border-radius: 8px; }
+.tc-brand span { color: var(--tc-vert); }
+
+/* ----- Bannière d'accueil sombre ----- */
+.tc-hero-mouvement { background: var(--tc-foret); color: rgba(255, 255, 255, .78); }
+.tc-hero-mouvement::before { opacity: .9; background: radial-gradient(38% 40% at 18% 30%, rgba(200, 241, 105, .18) 0%, transparent 70%), radial-gradient(40% 45% at 85% 75%, rgba(215, 122, 77, .22) 0%, transparent 70%); }
+.tc-hero-mouvement::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); }
+.tc-hero-mouvement .tc-surtitre { color: var(--tc-citron); }
+.tc-hero-mouvement .tc-hero-titre { color: #fff; }
+.tc-hero-mouvement .tc-hero-titre em { color: transparent; background: linear-gradient(90deg, var(--tc-citron), #f2d27a, var(--tc-terre)); -webkit-background-clip: text; background-clip: text; }
+.tc-hero-mouvement .tc-hero-pastilles strong { color: #fff; }
+.tc-hero-mouvement .tc-btn--clair { color: #fff; border-color: rgba(255, 255, 255, .5); }
+.tc-hero-mouvement .tc-btn--clair:hover { color: var(--tc-foret); }
+.tc-mosaique img { border-radius: 18px; box-shadow: 0 25px 50px -15px rgba(0, 0, 0, .55); }
+.tc-hero-flottant { position: absolute; z-index: 3; display: flex; align-items: center; gap: .8rem; padding: .85rem 1.1rem; border-radius: 18px;
+  background: rgba(255, 255, 255, .14); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, .22); color: #fff; font-size: .85rem;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, .45); animation: tc-flotte 6s ease-in-out infinite; }
+.tc-hero-flottant strong { display: block; font-size: 1.15rem; font-weight: 500; }
+.tc-hero-flottant .tc-stat__icone { background: var(--tc-citron); color: var(--tc-foret); width: 40px; height: 40px; }
+.tc-hero-flottant--1 { left: -4%; top: 22%; }
+.tc-hero-flottant--2 { right: 2%; bottom: 14%; animation-delay: -3s; }
+@keyframes tc-flotte { 50% { transform: translateY(-14px); } }
+
+/* ----- Bandeau défilant citron ----- */
+.tc-defilant { background: var(--tc-citron); color: var(--tc-foret); border: 0; transform: rotate(-1.2deg) scale(1.02); margin: -14px 0 0; position: relative; z-index: 2; box-shadow: 0 20px 40px -20px rgba(14, 35, 24, .5); }
+.tc-defilant span:nth-child(even) { -webkit-text-stroke: 1.2px var(--tc-foret); }
+.tc-defilant i { color: var(--tc-foret); }
+
+/* ----- Grille « bento » du cycle ----- */
+.tc-bento { display: grid; gap: 18px; grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(240px, auto); }
+.tc-bento__case { position: relative; overflow: hidden; border-radius: 26px; padding: 1.75rem; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; text-decoration: none; min-height: 260px; isolation: isolate; }
+.tc-bento__case img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); }
+.tc-bento__case::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(14, 35, 24, .05) 20%, rgba(14, 35, 24, .88) 100%); transition: background .4s; }
+.tc-bento__case:hover img { transform: scale(1.07); }
+.tc-bento__case:hover { color: #fff; }
+.tc-bento__case--grand { grid-column: span 2; grid-row: span 2; }
+.tc-bento__case--large { grid-column: span 2; }
+.tc-bento__case h3 { font-family: "Marcellus", serif; font-size: clamp(1.6rem, 2.4vw, 2.4rem); color: #fff; margin: .4rem 0 .5rem; }
+.tc-bento__case p { color: rgba(255, 255, 255, .82); font-size: .95rem; margin: 0 0 1rem; max-width: 420px; }
+.tc-bento__haut { position: absolute; top: 1.4rem; left: 1.75rem; right: 1.75rem; display: flex; justify-content: space-between; align-items: center; }
+.tc-bento__numero { font-size: .8rem; letter-spacing: .14em; padding: .35rem .8rem; border-radius: 999px; background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); }
+.tc-bento__fleche { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--tc-citron); color: var(--tc-foret); transition: transform .4s cubic-bezier(.2, .8, .2, 1); }
+.tc-bento__fleche svg { width: 20px; height: 20px; transform: rotate(-45deg); }
+.tc-bento__case:hover .tc-bento__fleche { transform: rotate(45deg) scale(1.08); }
+.tc-bento__chiffre { display: inline-flex; align-items: baseline; gap: .4rem; font-size: .85rem; color: rgba(255, 255, 255, .85); }
+.tc-bento__chiffre strong { font-size: 1.6rem; font-weight: 500; color: var(--tc-citron); }
+.tc-bento__case--texte { background: var(--tc-sable); color: var(--tc-encre); justify-content: center; }
+.tc-bento__case--texte::before { display: none; }
+@media (max-width: 991.98px) { .tc-bento { grid-template-columns: 1fr 1fr; } .tc-bento__case--grand { grid-row: span 1; min-height: 360px; } }
+@media (max-width: 575.98px) { .tc-bento { grid-template-columns: 1fr; } .tc-bento__case--grand, .tc-bento__case--large { grid-column: span 1; } }
+
+/* ----- Grands chiffres d'impact ----- */
+.tc-impact { position: relative; overflow: hidden; background: var(--tc-foret); color: rgba(255, 255, 255, .75); border-radius: 32px; padding: clamp(2rem, 5vw, 4rem); }
+.tc-impact::before { content: ""; position: absolute; width: 520px; height: 520px; right: -140px; top: -180px; border-radius: 50%; background: radial-gradient(circle, rgba(200, 241, 105, .28), transparent 65%); }
+.tc-impact h2 { color: #fff; font-family: "Marcellus", serif; font-size: clamp(2rem, 3.6vw, 3rem); }
+.tc-impact__valeur { font-size: clamp(2.6rem, 5.5vw, 4.6rem); font-weight: 300; line-height: 1; color: var(--tc-citron); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.tc-impact__libelle { margin-top: .6rem; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; }
+.tc-impact .col-md-4 + .col-md-4 { border-left: 1px solid rgba(255, 255, 255, .12); }
+@media (max-width: 767.98px) { .tc-impact .col-md-4 + .col-md-4 { border-left: 0; border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 1.5rem; } }
+
+/* ----- Appel à l'action final ----- */
+.tc-cta { position: relative; overflow: hidden; border-radius: 32px; padding: clamp(2.5rem, 6vw, 5rem); background: linear-gradient(120deg, var(--tc-citron), #e9f6b8 55%, #f6e3c8); color: var(--tc-foret); }
+.tc-cta h2 { font-family: "Marcellus", serif; font-size: clamp(2rem, 4vw, 3.4rem); color: var(--tc-foret); max-width: 680px; }
+.tc-cta img { position: absolute; right: -2%; bottom: -12%; width: min(34%, 360px); border-radius: 26px; transform: rotate(6deg); box-shadow: var(--tc-ombre); }
+@media (max-width: 991.98px) { .tc-cta img { display: none; } }
+
+/* ----- Pied de page sombre ----- */
+#footer { background: var(--tc-foret); color: rgba(255, 255, 255, .68); margin-top: 6rem !important; border-radius: 36px 36px 0 0; }
+#footer .tc-brand { color: #fff; }
+#footer .tc-brand span { color: var(--tc-citron); }
+#footer .widget-title { color: #fff; letter-spacing: .12em; font-size: .85rem; }
+#footer a, #footer .item-anchor { color: rgba(255, 255, 255, .78); }
+#footer a:hover { color: var(--tc-citron); }
+#footer .text-secondary { color: rgba(255, 255, 255, .6) !important; }
+#footer hr, #footer .border-top { border-color: rgba(255, 255, 255, .12) !important; }
+
+/* ----- Divers ----- */
+.tc-hero { background: linear-gradient(180deg, var(--tc-sable), #fbf8f2); border-bottom: 0; }
+.tc-hero h1 { letter-spacing: -.01em; }
+.tc-bandeau-impact { border-radius: 0; }
+.section-title { letter-spacing: -.01em; }
+
+/* ----- Témoignages ----- */
+.tc-temoignage { position: relative; height: 100%; margin: 0; padding: 2rem 1.6rem 1.6rem; background: #fff; border-radius: var(--tc-rayon); box-shadow: var(--tc-ombre); transition: transform .4s cubic-bezier(.2, .8, .2, 1); }
+.tc-temoignage:hover { transform: translateY(-6px); }
+.tc-temoignage__guillemet { position: absolute; top: -.2rem; right: 1.2rem; font-family: "Marcellus", serif; font-size: 5rem; line-height: 1; color: var(--tc-citron); }
+.tc-temoignage blockquote { margin: 0 0 1.5rem; color: var(--tc-encre); font-size: 1rem; line-height: 1.6; }
+.tc-temoignage figcaption { display: flex; align-items: center; gap: .7rem; font-size: .85rem; letter-spacing: .04em; color: var(--tc-texte); }
+.tc-temoignage__avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--tc-foret); color: var(--tc-citron); font-weight: 500; }
+
+/* ----- Section « Un geste simple pour la planète » du template, au style du thème ----- */
+.collection { background: transparent !important; }
+.collection .collection-item { border-radius: 32px; overflow: hidden; box-shadow: var(--tc-ombre); background: #fff; margin-block: 2rem !important; }
+.collection .image-holder img { height: 100%; object-fit: cover; }
+.collection .collection-content { margin: 0 !important; }
+.collection .element-title { font-family: "Marcellus", serif; text-transform: none !important; font-size: clamp(1.8rem, 3vw, 2.6rem); color: var(--tc-encre); }
+.collection .title-xlarge { color: rgba(14, 35, 24, .06); }
+.collection .column-container { padding: 0 !important; }
+.collection .image-holder { height: 100%; }
+#associations .section-title { text-transform: none !important; font-size: clamp(2rem, 3.6vw, 3rem); }

@@ -6,14 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'Administration') | TexTileCycle</title>
-  <link rel="icon" href="{{ asset('back/favicon.ico') }}">
+  <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
 
   {{-- Police servie en local (plus de Google Fonts) : plus rapide et utilisable sans internet. --}}
-  <link rel="stylesheet" href="{{ asset('back/fonts/polices.css') }}">
+  <link rel="stylesheet" href="{{ asset_v('back/fonts/polices.css') }}">
 
-  <link rel="stylesheet" href="{{ asset('back/css/sneat.css') }}">
-  <link rel="stylesheet" href="{{ asset('back/css/theme.css') }}">
-  <link rel="stylesheet" href="{{ asset('back/css/custom.css') }}">
+  <link rel="stylesheet" href="{{ asset_v('back/css/sneat.css') }}">
+  <link rel="stylesheet" href="{{ asset_v('back/css/theme.css') }}">
+  <link rel="stylesheet" href="{{ asset_v('back/css/custom.css') }}">
+  <link rel="stylesheet" href="{{ asset_v('back/css/doux.css') }}">
   @stack('styles')
 </head>
 
@@ -41,7 +42,7 @@
     </div>
   </div>
 
-  <script src="{{ asset('back/js/main.js') }}"></script>
+  <script src="{{ asset_v('back/js/main.js') }}"></script>
   @stack('scripts')
 </body>
 

@@ -35,10 +35,4 @@ return [
         ],
     ],
 
-    // Module Dépôt : classement des photos par l'IA Claude (facultatif, analyse locale sans clé).
-    'anthropic' => [
-        'key' => env('ANTHROPIC_API_KEY'),
-        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
-    ],
-
 ];

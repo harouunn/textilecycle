@@ -7,14 +7,6 @@
 @php
   $ctaUrl = auth()->check() ? auth()->user()->accueil() : route('register');
 
-  $slides = [
-    ['image' => 'banner-image-6.jpg', 'title' => 'Déposez vos vêtements', 'text' => 'Confiez-nous les vêtements que vous ne portez plus, en point de collecte ou en ligne.'],
-    ['image' => 'banner-image-1.jpg', 'title' => 'Réparation', 'text' => 'Un bouton, une couture, une fermeture : nos couturiers redonnent vie à vos pièces.'],
-    ['image' => 'banner-image-2.jpg', 'title' => 'Upcycling', 'text' => 'Les textiles abîmés deviennent des créations uniques et durables.'],
-    ['image' => 'banner-image-3.jpg', 'title' => 'Don aux associations', 'text' => 'Les vêtements en bon état sont redistribués à nos associations partenaires.'],
-    ['image' => 'banner-image-4.jpg', 'title' => 'Mode responsable', 'text' => 'Chaque vêtement réutilisé, c\'est de l\'eau, de l\'énergie et des déchets économisés.'],
-    ['image' => 'banner-image-5.jpg', 'title' => 'Une démarche solidaire', 'text' => 'Rejoignez une communauté engagée pour une mode plus juste et plus durable.'],
-  ];
 
   $testimonials = [
     ['quote' => '« J\'ai déposé trois sacs de vêtements en dix minutes. Savoir qu\'ils vont servir à quelqu\'un, ça n\'a pas de prix. »', 'author' => 'Sarah, donatrice'],
@@ -24,96 +16,125 @@
   ];
 @endphp
 
-  {{-- Bannière --}}
-  <section id="billboard" class="bg-light py-5">
+  {{-- Bannière en mouvement : titre révélé mot par mot, mosaïque de photos qui défilent --}}
+  @php
+    $motsTitre = ['Donnez', 'une', '<em>seconde</em>', '<em>vie</em>', 'à', 'vos', 'vêtements'];
+  @endphp
+  <section id="billboard" class="tc-hero-mouvement tc-page">
     <div class="container">
-      <div class="row justify-content-center">
-        <h1 class="section-title text-center mt-4" data-aos="fade-up">Donnez une seconde vie à vos vêtements</h1>
-        <div class="col-md-6 text-center" data-aos="fade-up" data-aos-delay="300">
-          <p>TexTileCycle collecte vos vêtements, les répare, les transforme ou les offre aux associations. Une plateforme
-            simple pour réduire le gaspillage textile et soutenir la solidarité près de chez vous.</p>
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <div class="tc-surtitre">Économie circulaire du textile</div>
+          {{-- Chaque mot glisse vers le haut, l'un après l'autre (texte fixe, sans saisie utilisateur). --}}
+          <h1 class="tc-hero-titre">{!! collect($motsTitre)->map(fn ($mot, $i) => '<span class="mot"><span style="--i: '.$i.'">'.$mot.'</span></span>')->implode(' ') !!}</h1>
+          <p class="tc-hero-texte">Déposez, réparez, transformez ou donnez : TexTileCycle trouve la meilleure destination pour chaque vêtement, près de chez vous.</p>
+          <div class="tc-hero-actions d-flex flex-wrap gap-3 mt-4">
+            <a href="{{ route('depot.mes-depots.create') }}" class="tc-btn tc-btn--vert tc-btn--magnetique"><x-ui.icone nom="plus" /> Déposer un vêtement</a>
+            <a href="{{ route('depot.catalogue.index') }}" class="tc-btn tc-btn--clair tc-btn--magnetique">Explorer le catalogue <x-ui.icone nom="fleche" /></a>
+          </div>
+          <div class="tc-hero-pastilles">
+            <div><strong data-compteur="{{ $chiffres['vetements'] }}">{{ $chiffres['vetements'] }}</strong><span>vêtements disponibles</span></div>
+            <div><strong data-compteur="{{ $chiffres['ateliers'] }}">{{ $chiffres['ateliers'] }}</strong><span>ateliers partenaires</span></div>
+            <div><strong data-compteur="{{ $chiffres['associations'] }}">{{ $chiffres['associations'] }}</strong><span>associations</span></div>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="swiper main-swiper py-4" data-aos="fade-up" data-aos-delay="600">
-          <div class="swiper-wrapper d-flex border-animation-left">
-            @foreach ($slides as $slide)
-              <div class="swiper-slide">
-                <div class="banner-item image-zoom-effect">
-                  <div class="image-holder">
-                    <a href="#concept">
-                      <img loading="lazy" decoding="async" src="{{ asset('front/images/'.$slide['image']) }}" alt="{{ $slide['title'] }}" class="img-fluid">
-                    </a>
-                  </div>
-                  <div class="banner-content py-4">
-                    <h5 class="element-title text-uppercase">
-                      <a href="#concept" class="item-anchor">{{ $slide['title'] }}</a>
-                    </h5>
-                    <p>{{ $slide['text'] }}</p>
-                    <div class="btn-left">
-                      <a href="#concept" class="btn-link fs-6 text-uppercase item-anchor text-decoration-none">En savoir plus</a>
-                    </div>
-                  </div>
+        <div class="col-lg-6 position-relative" aria-hidden="true">
+          <div class="tc-hero-flottant tc-hero-flottant--1"><span class="tc-stat__icone"><x-ui.icone nom="feuille" /></span><div><strong>{{ number_format($chiffres['impact']['eau'], 0, ',', ' ') }} L</strong>d'eau économisés</div></div>
+          <div class="tc-hero-flottant tc-hero-flottant--2"><span class="tc-stat__icone"><x-ui.icone nom="valide" /></span><div><strong>Vérifié</strong>par notre équipe</div></div>
+          <div class="tc-mosaique">
+            @foreach ($mosaique as $colonne)
+              <div class="tc-mosaique__colonne">
+                <div class="tc-mosaique__piste">
+                  {{-- La colonne est répétée deux fois : le défilement boucle sans couture. --}}
+                  @foreach ([...$colonne, ...$colonne] as $photo)
+                    <a href="{{ $photo['lien'] }}" tabindex="-1"><img src="{{ $photo['src'] }}" alt="" width="300" height="400" @if ($loop->index >= 3) loading="lazy" @endif decoding="async"></a>
+                  @endforeach
                 </div>
               </div>
             @endforeach
           </div>
-          <div class="swiper-pagination"></div>
         </div>
-        <div class="icon-arrow icon-arrow-left"><svg width="50" height="50" viewBox="0 0 24 24">
-            <use xlink:href="#arrow-left"></use>
-          </svg></div>
-        <div class="icon-arrow icon-arrow-right"><svg width="50" height="50" viewBox="0 0 24 24">
-            <use xlink:href="#arrow-right"></use>
-          </svg></div>
       </div>
     </div>
   </section>
 
-  {{-- Le cycle TexTileCycle : les quatre gestions, avec leurs vrais chiffres --}}
+  {{-- Bandeau défilant --}}
+  <div class="tc-defilant" aria-hidden="true">
+    <div class="tc-defilant__piste">
+      @foreach (range(1, 2) as $repetition)
+        @foreach (['Déposer', 'Réparer', 'Transformer', 'Donner', 'Seconde vie', 'Zéro gaspillage'] as $mot)
+          <span>{{ $mot }} <i>✦</i></span>
+        @endforeach
+      @endforeach
+    </div>
+  </div>
+
+  {{-- Le cycle TexTileCycle : grille « bento » des quatre gestions, avec leurs vrais chiffres --}}
   @php
     $etapesCycle = [
-        ['numero' => '01', 'titre' => 'Déposer', 'texte' => 'Photographiez votre vêtement : notre analyse remplit la fiche pour vous. Après validation, il rejoint le catalogue.', 'chiffre' => $chiffres['vetements'], 'unite' => 'vêtement(s) disponible(s)', 'lien' => route('depot.catalogue.index'), 'action' => 'Voir le catalogue', 'icone' => 'cintre'],
-        ['numero' => '02', 'titre' => 'Réparer', 'texte' => 'Un trou, une fermeture, un ourlet ? Nos ateliers partenaires diagnostiquent et estiment la réparation.', 'chiffre' => $chiffres['ateliers'], 'unite' => 'atelier(s) partenaire(s)', 'lien' => route('ateliers.index'), 'action' => 'Trouver un atelier', 'icone' => 'cle'],
-        ['numero' => '03', 'titre' => 'Transformer', 'texte' => 'Trop abîmé pour être porté ? Il devient un sac, un coussin ou une création unique grâce à l\'upcycling.', 'chiffre' => $chiffres['projets'], 'unite' => 'projet(s) d\'upcycling', 'lien' => route('upcycling.index'), 'action' => 'Voir les créations', 'icone' => 'etincelle'],
-        ['numero' => '04', 'titre' => 'Donner', 'texte' => 'Les vêtements en bon état habillent celles et ceux qui en ont besoin, via nos associations partenaires.', 'chiffre' => $chiffres['associations'], 'unite' => 'association(s) partenaire(s)', 'lien' => route('dons.index'), 'action' => 'Faire un don', 'icone' => 'feuille'],
+        ['numero' => '01', 'titre' => 'Déposer', 'texte' => 'Photographiez votre vêtement : notre analyse remplit la fiche pour vous. Après validation, il rejoint le catalogue.', 'chiffre' => $chiffres['vetements'], 'unite' => 'vêtement(s) disponible(s)', 'lien' => route('depot.catalogue.index'), 'image' => 'banner-image-6.jpg', 'taille' => 'grand'],
+        ['numero' => '02', 'titre' => 'Réparer', 'texte' => 'Nos ateliers diagnostiquent et estiment la réparation.', 'chiffre' => $chiffres['ateliers'], 'unite' => 'atelier(s) partenaire(s)', 'lien' => route('ateliers.index'), 'image' => 'post-image7.jpg', 'taille' => 'large'],
+        ['numero' => '03', 'titre' => 'Transformer', 'texte' => 'Il devient un sac, un coussin ou une création unique.', 'chiffre' => $chiffres['projets'], 'unite' => 'projet(s) d\'upcycling', 'lien' => route('upcycling.index'), 'image' => 'cat-item3.jpg', 'taille' => 'normal'],
+        ['numero' => '04', 'titre' => 'Donner', 'texte' => 'Il habille celles et ceux qui en ont besoin.', 'chiffre' => $chiffres['associations'], 'unite' => 'association(s) partenaire(s)', 'lien' => route('dons.index'), 'image' => 'insta-item5.jpg', 'taille' => 'normal'],
     ];
   @endphp
 
-  <section id="concept" class="tc-page py-5">
+  <section id="concept" class="tc-page py-5 my-md-4">
     <div class="container py-md-4">
-      <div class="text-center mb-5">
-        <div class="tc-surtitre">Le cycle TexTileCycle</div>
-        <h2 class="section-title mt-2">Quatre chemins pour une seconde vie</h2>
-        <p class="mx-auto" style="max-width: 640px;">Chaque vêtement trouve sa meilleure destination. Les quatre gestions de la plateforme sont reliées : un vêtement déposé peut être réparé, transformé ou donné.</p>
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-5" data-revele>
+        <div>
+          <div class="tc-surtitre">Le cycle TexTileCycle</div>
+          <h2 class="section-title mt-2 mb-0" style="font-size: clamp(2.2rem, 4vw, 3.4rem);">Quatre chemins pour une seconde vie</h2>
+        </div>
+        <p class="mb-0" style="max-width: 420px;">Chaque vêtement trouve sa meilleure destination. Les quatre gestions de la plateforme sont reliées : un vêtement déposé peut être réparé, transformé ou donné.</p>
       </div>
-      <div class="row g-4">
+
+      <div class="tc-bento">
         @foreach ($etapesCycle as $etape)
-          <div class="col-md-6 col-lg-3">
-            <a href="{{ $etape['lien'] }}" class="tc-cycle-carte">
-              <div class="d-flex justify-content-between align-items-start mb-4">
-                <span class="tc-cycle-carte__numero">{{ $etape['numero'] }}</span>
-                <span class="tc-stat__icone"><x-ui.icone :nom="$etape['icone']" /></span>
-              </div>
-              <h3>{{ $etape['titre'] }}</h3>
-              <p>{{ $etape['texte'] }}</p>
-              <div class="tc-cycle-carte__chiffre"><strong>{{ $etape['chiffre'] }}</strong> {{ $etape['unite'] }}</div>
-              <span class="tc-produit__cta mt-3 d-inline-block">{{ $etape['action'] }}</span>
-            </a>
-          </div>
+          <a href="{{ $etape['lien'] }}" class="tc-bento__case tc-bento__case--{{ $etape['taille'] }}" data-revele>
+            <img src="{{ asset('front/images/'.$etape['image']) }}" alt="" loading="lazy" decoding="async">
+            <div class="tc-bento__haut">
+              <span class="tc-bento__numero">{{ $etape['numero'] }}</span>
+              <span class="tc-bento__fleche"><x-ui.icone nom="fleche" /></span>
+            </div>
+            <h3>{{ $etape['titre'] }}</h3>
+            <p>{{ $etape['texte'] }}</p>
+            <div class="tc-bento__chiffre"><strong data-compteur="{{ $etape['chiffre'] }}">{{ $etape['chiffre'] }}</strong> {{ $etape['unite'] }}</div>
+          </a>
         @endforeach
       </div>
     </div>
   </section>
 
+  {{-- Impact écologique en grands chiffres --}}
   @if ($chiffres['impact']['vetements'] > 0)
-    <div class="tc-bandeau-impact">
-      <div class="container d-flex flex-wrap justify-content-center gap-4 gap-md-5">
-        <span><x-ui.icone nom="cintre" /> <strong>{{ $chiffres['impact']['vetements'] }}</strong> vêtement(s) ont trouvé une seconde vie</span>
-        <span><x-ui.icone nom="feuille" /> <strong>{{ \App\Services\Depot\ImpactEcologique::formaterEau($chiffres['impact']['eau']) }}</strong> d'eau économisés</span>
-        <span><x-ui.icone nom="etincelle" /> <strong>{{ number_format($chiffres['impact']['co2'], 0, ',', ' ') }} kg</strong> de CO₂ évités</span>
+    <section class="tc-page pb-5">
+      <div class="container">
+        <div class="tc-impact" data-revele>
+          <div class="row g-4 align-items-end mb-5 position-relative">
+            <div class="col-lg-7">
+              <div class="tc-surtitre">Notre impact, en temps réel</div>
+              <h2 class="mt-2 mb-0">Chaque vêtement sauvé compte vraiment.</h2>
+            </div>
+            <div class="col-lg-5"><p class="mb-0">Estimations calculées à partir des vêtements donnés ou recyclés sur la plateforme, selon leur type.</p></div>
+          </div>
+          <div class="row g-4 position-relative">
+            <div class="col-md-4">
+              <div class="tc-impact__valeur" data-compteur="{{ $chiffres['impact']['vetements'] }}">{{ $chiffres['impact']['vetements'] }}</div>
+              <div class="tc-impact__libelle">vêtement(s) ont trouvé une seconde vie</div>
+            </div>
+            <div class="col-md-4">
+              <div class="tc-impact__valeur"><span data-compteur="{{ $chiffres['impact']['eau'] }}">{{ number_format($chiffres['impact']['eau'], 0, ',', ' ') }}</span> L</div>
+              <div class="tc-impact__libelle">d'eau économisés</div>
+            </div>
+            <div class="col-md-4">
+              <div class="tc-impact__valeur"><span data-compteur="{{ $chiffres['impact']['co2'] }}">{{ number_format($chiffres['impact']['co2'], 0, ',', ' ') }}</span> kg</div>
+              <div class="tc-impact__libelle">de CO₂ évités</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   @endif
 
   {{-- Derniers vêtements du catalogue (données réelles) --}}
@@ -129,7 +150,7 @@
         </div>
         <div class="row g-4">
           @foreach ($derniersVetements as $vetement)
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-6 col-md-4 col-lg-3" data-revele>
               <x-depot.carte-vetement :vetement="$vetement" />
             </div>
           @endforeach
@@ -145,12 +166,12 @@
         <div class="title-xlarge text-uppercase txt-fx domino">Seconde vie</div>
         <div class="collection-item d-flex flex-wrap my-5">
           <div class="col-md-6 column-container">
-            <div class="image-holder">
+            <div class="image-holder" data-revele="image">
               <img loading="lazy" decoding="async" src="{{ asset('front/images/single-image-2.jpg') }}" alt="Vêtements prêts pour une seconde vie" class="product-image img-fluid">
             </div>
           </div>
           <div class="col-md-6 column-container bg-white">
-            <div class="collection-content p-5 m-0 m-md-5">
+            <div class="collection-content p-5 m-0 m-md-5" data-revele>
               <h3 class="element-title text-uppercase">Un geste simple pour la planète</h3>
               <p>Chaque année, des tonnes de vêtements finissent à la décharge alors qu'ils pourraient encore être portés.
                 Avec TexTileCycle, chaque pièce trouve sa meilleure destination : elle est réparée si elle peut l'être,
@@ -165,25 +186,27 @@
   </section>
 
   {{-- Témoignages --}}
-  <section class="testimonials py-5 bg-light">
-    <div class="section-header text-center mt-5">
-      <h3 class="section-title">ILS NOUS FONT CONFIANCE</h3>
-    </div>
-    <div class="swiper testimonial-swiper overflow-hidden my-5">
-      <div class="swiper-wrapper d-flex">
+  <section class="tc-page py-5 my-md-4">
+    <div class="container">
+      <div class="text-center mb-5" data-revele>
+        <div class="tc-surtitre">Ils nous font confiance</div>
+        <h2 class="section-title mt-2">Ce qu'en dit la communauté</h2>
+      </div>
+      <div class="row g-4">
         @foreach ($testimonials as $testimonial)
-          <div class="swiper-slide">
-            <div class="testimonial-item text-center">
-              <blockquote>
-                <p>{{ $testimonial['quote'] }}</p>
-                <div class="review-title text-uppercase">{{ $testimonial['author'] }}</div>
-              </blockquote>
-            </div>
+          <div class="col-md-6 col-lg-3" data-revele>
+            <figure class="tc-temoignage">
+              <span class="tc-temoignage__guillemet" aria-hidden="true">“</span>
+              <blockquote>{{ trim($testimonial['quote'], '«» ') }}</blockquote>
+              <figcaption>
+                <span class="tc-temoignage__avatar" aria-hidden="true">{{ mb_substr($testimonial['author'], 0, 1) }}</span>
+                {{ $testimonial['author'] }}
+              </figcaption>
+            </figure>
           </div>
         @endforeach
       </div>
     </div>
-    <div class="testimonial-swiper-pagination d-flex justify-content-center mb-5"></div>
   </section>
 
   {{-- Associations partenaires --}}
@@ -196,7 +219,7 @@
       @if ($associations->isNotEmpty())
         <div class="tc-page d-flex flex-wrap justify-content-center gap-3">
           @foreach ($associations as $association)
-            <a href="{{ route('dons.associations.show', $association) }}" class="tc-carte tc-association">
+            <a href="{{ route('dons.associations.show', $association) }}" class="tc-carte tc-association" data-revele>
               <strong>{{ $association->nom }}</strong>
               <span>{{ $association->ville }}</span>
             </a>
@@ -214,21 +237,20 @@
     </div>
   </section>
 
-  {{-- Appel à l'action --}}
-  <section class="newsletter bg-light tc-page" style="background: url({{ asset('front/images/pattern-bg.png') }}) no-repeat;">
+  {{-- Appel à l'action final --}}
+  <section class="tc-page py-5">
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-8 py-5 my-5 text-center">
-          <div class="tc-surtitre mb-2">Rejoignez le cycle</div>
-          <h3 class="section-title text-uppercase mb-3">Un vêtement que vous ne portez plus ?</h3>
-          <p class="mb-4">Déposez-le en deux minutes : notre analyse de photo remplit la fiche, l'équipe la valide, et il trouve preneur.</p>
-          <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="{{ route('depot.mes-depots.create') }}" class="tc-btn tc-btn--vert"><x-ui.icone nom="plus" /> Déposer un vêtement</a>
-            @guest
-              <a href="{{ route('register') }}" class="tc-btn tc-btn--clair">Créer un compte</a>
-            @endguest
-          </div>
+      <div class="tc-cta" data-revele>
+        <div class="tc-surtitre" style="color: var(--tc-foret);">Rejoignez le cycle</div>
+        <h2 class="mt-2 mb-3">Un vêtement que vous ne portez plus ? Offrez-lui une seconde vie.</h2>
+        <p class="mb-4" style="max-width: 520px;">Déposez-le en deux minutes : notre analyse de photo remplit la fiche, l'équipe la valide, et il trouve preneur.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{{ route('depot.mes-depots.create') }}" class="tc-btn tc-btn--magnetique"><x-ui.icone nom="plus" /> Déposer un vêtement</a>
+          @guest
+            <a href="{{ route('register') }}" class="tc-btn tc-btn--clair tc-btn--magnetique">Créer un compte</a>
+          @endguest
         </div>
+        <img src="{{ asset('front/images/product-item-6.jpg') }}" alt="" loading="lazy" decoding="async">
       </div>
     </div>
   </section>

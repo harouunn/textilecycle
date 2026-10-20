@@ -40,7 +40,7 @@
           <ul class="menu-list list-unstyled text-uppercase border-animation-left fs-6">
             <li class="menu-item"><a href="{{ route('home') }}" class="item-anchor">Accueil</a></li>
             <li class="menu-item"><a href="{{ route('home') }}#concept" class="item-anchor">Le concept</a></li>
-            <li class="menu-item"><a href="{{ route('home') }}#services" class="item-anchor">Nos services</a></li>
+            <li class="menu-item"><a href="{{ route('depot.catalogue.index') }}" class="item-anchor">Catalogue</a></li>
             <li class="menu-item"><a href="{{ route('home') }}#associations" class="item-anchor">Associations</a></li>
             @guest
               <li class="menu-item"><a href="{{ route('register') }}" class="item-anchor">Créer un compte</a></li>
@@ -50,13 +50,12 @@
       </div>
       <div class="col-md-3 col-sm-6">
         <div class="footer-menu footer-menu-003">
-          <h5 class="widget-title text-uppercase mb-4">Aide & infos</h5>
+          <h5 class="widget-title text-uppercase mb-4">Le cycle</h5>
           <ul class="menu-list list-unstyled text-uppercase border-animation-left fs-6">
-            <li class="menu-item"><a href="#" class="item-anchor">Comment déposer ?</a></li>
-            <li class="menu-item"><a href="#" class="item-anchor">Vêtements acceptés</a></li>
-            <li class="menu-item"><a href="#" class="item-anchor">Points de collecte</a></li>
-            <li class="menu-item"><a href="#" class="item-anchor">Devenir association partenaire</a></li>
-            <li class="menu-item"><a href="#" class="item-anchor">FAQ</a></li>
+            <li class="menu-item"><a href="{{ route('depot.mes-depots.create') }}" class="item-anchor">Déposer un vêtement</a></li>
+            <li class="menu-item"><a href="{{ route('ateliers.index') }}" class="item-anchor">Faire réparer</a></li>
+            <li class="menu-item"><a href="{{ route('upcycling.index') }}" class="item-anchor">Upcycling</a></li>
+            <li class="menu-item"><a href="{{ route('dons.index') }}" class="item-anchor">Donner à une association</a></li>
           </ul>
         </div>
       </div>

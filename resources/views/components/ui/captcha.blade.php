@@ -6,7 +6,7 @@
       <img src="{{ route('captcha') }}?t={{ now()->getTimestamp() }}" alt="Code de vérification à recopier" width="200" height="64" id="captcha-image">
       <button type="button" class="tc-oeil position-static" aria-label="Afficher une autre image"
         onclick="document.getElementById('captcha-image').src = '{{ route('captcha') }}?t=' + Date.now(); document.getElementById('captcha').value = ''; document.getElementById('captcha').focus();">
-        <x-ui.icone nom="retour" style="transform: rotate(-90deg);" />
+        <x-ui.icone nom="actualiser" />
       </button>
     </div>
     <input id="captcha" type="text" name="captcha" required maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false"

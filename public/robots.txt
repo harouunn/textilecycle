@@ -1,2 +1,5 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /profile
+Disallow: /depot/mes-depots
+Disallow: /depot/mes-reservations

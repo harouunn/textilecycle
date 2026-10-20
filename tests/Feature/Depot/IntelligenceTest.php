@@ -14,9 +14,10 @@ use App\Services\Depot\DetecteurDoublons;
 use App\Services\Depot\ImpactEcologique;
 use App\Services\Depot\Recommandations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Tests\TestCase;
 
 class IntelligenceTest extends TestCase
@@ -29,22 +30,24 @@ class IntelligenceTest extends TestCase
         Storage::fake('public');
     }
 
-    public function test_ai_is_skipped_without_an_api_key(): void
+    public function test_ai_is_skipped_when_disabled(): void
     {
-        config(['services.anthropic.key' => null]);
+        Http::fake();
+        config(['depot.ia.active' => false]);
 
         $this->assertFalse(app(ClassificateurIA::class)->disponible());
         $this->assertNull(app(ClassificateurIA::class)->classer('photo.jpg', 'Chemise', collect()));
+        Http::assertNothingSent();
     }
 
-    public function test_ai_classification_prefills_the_form_when_a_key_is_configured(): void
+    public function test_ollama_vision_model_prefills_the_form(): void
     {
         $categorie = Categorie::factory()->create(['nom' => 'Hauts']);
-        $this->simulerIA([
+        $this->simulerOllama(Http::response(['done' => true, 'message' => ['role' => 'assistant', 'content' => json_encode([
             'categorie' => 'Hauts', 'type_vetement' => 'chemise', 'matiere' => 'lin', 'etat' => 'tres_bon',
             'genre' => 'homme', 'taille' => 'M', 'couleur' => 'bleu ciel', 'uni' => true,
             'defauts' => ['petite tache au col'], 'description' => 'Chemise en lin bleu ciel, coupe droite.', 'confiance' => 88,
-        ]);
+        ])]]));
 
         $response = $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.analyser'), [
             'titre' => 'Chemise',
@@ -56,13 +59,19 @@ class IntelligenceTest extends TestCase
         $response->assertSessionHasInput('etat', 'tres_bon');
         $response->assertSessionHasInput('description', 'Chemise en lin bleu ciel, coupe droite.');
         $this->assertContains('Défauts repérés sur la photo : petite tache au col.', session('analyse'));
-        $this->assertStringContainsString('confiance 88 %', session('analyse')[0]);
+        $this->assertStringContainsString('Ollama (gemma3:4b, confiance 88 %)', session('analyse')[0]);
+
+        // La photo est envoyée au modèle local, avec un schéma qui impose les valeurs du projet.
+        Http::assertSent(fn ($requete) => $requete->url() === 'http://127.0.0.1:11434/api/chat'
+            && $requete['model'] === 'gemma3:4b'
+            && filled($requete['messages'][1]['images'][0])
+            && in_array('Hauts', $requete['format']['properties']['categorie']['enum'], true));
     }
 
-    public function test_local_analysis_takes_over_when_the_ai_fails(): void
+    public function test_local_analysis_takes_over_when_ollama_is_down(): void
     {
         Categorie::factory()->create(['nom' => 'Hauts', 'description' => 'Chemises et tops.']);
-        $this->simulerIA(new RuntimeException('Réseau indisponible'));
+        $this->simulerOllama(fn () => throw new ConnectionException('Connexion refusée'));
 
         $response = $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.analyser'), [
             'titre' => 'Chemise en lin',
@@ -71,6 +80,27 @@ class IntelligenceTest extends TestCase
 
         $response->assertSessionHasInput('matiere', 'Lin');
         $this->assertStringStartsWith('Photo : couleur dominante', session('analyse')[0]);
+    }
+
+    public function test_local_analysis_takes_over_when_the_model_is_missing(): void
+    {
+        Categorie::factory()->create(['nom' => 'Hauts']);
+        $this->simulerOllama(Http::response(['error' => 'model "gemma3:4b" not found'], 404));
+
+        $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.analyser'), [
+            'titre' => 'Chemise en lin',
+            'photo' => UploadedFile::fake()->image('chemise.jpg', 300, 400),
+        ]);
+
+        $this->assertStringStartsWith('Photo : couleur dominante', session('analyse')[0]);
+    }
+
+    public function test_status_reports_whether_the_model_is_installed(): void
+    {
+        config(['depot.ia.active' => true]);
+        Http::fake(['127.0.0.1:11434/api/tags' => Http::response(['models' => [['name' => 'gemma3:4b'], ['name' => 'qwen3:8b']]])]);
+
+        $this->assertSame(['en_ligne' => true, 'modele_installe' => true, 'modele' => 'gemma3:4b'], app(ClassificateurIA::class)->etat());
     }
 
     public function test_ecological_impact_depends_on_the_type_of_clothing(): void
@@ -142,26 +172,12 @@ class IntelligenceTest extends TestCase
     }
 
     /**
-     * Remplace l'appel réseau à Claude par une réponse (ou une erreur) simulée.
-     *
-     * @param  array<string, mixed>|\Throwable  $reponse
+     * Simule le serveur Ollama local (aucun vrai appel réseau pendant les tests).
      */
-    private function simulerIA(array|\Throwable $reponse): void
+    private function simulerOllama(mixed $reponse): void
     {
-        config(['services.anthropic.key' => 'cle-de-test']);
-        $this->app->instance(ClassificateurIA::class, new class($reponse) extends ClassificateurIA
-        {
-            public function __construct(private array|\Throwable $reponse) {}
-
-            protected function appeler(string $cheminPhoto, ?string $titre, array $nomsCategories): ?array
-            {
-                if ($this->reponse instanceof \Throwable) {
-                    throw $this->reponse;
-                }
-
-                return $this->reponse;
-            }
-        });
+        config(['depot.ia.active' => true, 'depot.ia.modele' => 'gemma3:4b', 'depot.ia.url' => 'http://127.0.0.1:11434']);
+        Http::fake(['127.0.0.1:11434/api/chat' => $reponse]);
     }
 
     private function photoMotif(int $largeur, int $hauteur, bool $inverse = false): string

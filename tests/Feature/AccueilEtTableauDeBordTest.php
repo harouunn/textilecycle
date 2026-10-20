@@ -29,6 +29,19 @@ class AccueilEtTableauDeBordTest extends TestCase
         $response->assertSee(route('dons.index'));
     }
 
+    public function test_pages_use_local_versioned_assets_and_no_cdn(): void
+    {
+        $accueil = $this->get(route('home'))->getContent();
+        $admin = $this->actingAs(User::factory()->admin()->create())->get(route('admin.dashboard'))->getContent();
+
+        $this->assertMatchesRegularExpression('#front/css/textilecycle\.css\?v=\d+#', $accueil);
+        $this->assertMatchesRegularExpression('#back/css/sneat\.css\?v=\d+#', $admin);
+        foreach ([$accueil, $admin] as $page) {
+            $this->assertStringNotContainsString('cdn.jsdelivr.net', $page);
+            $this->assertStringNotContainsString('fonts.googleapis.com', $page);
+        }
+    }
+
     public function test_admin_dashboard_shows_real_totals_and_tasks_to_handle(): void
     {
         Vetement::factory()->enAttente()->create();

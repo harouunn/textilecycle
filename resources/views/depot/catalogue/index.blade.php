@@ -151,7 +151,7 @@
             @else
               <div class="row g-4">
                 @foreach ($vetements as $vetement)
-                  <div class="col-6 col-md-4">
+                  <div class="col-6 col-md-4" data-revele>
                     <x-depot.carte-vetement :vetement="$vetement" />
                   </div>
                 @endforeach

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Depot\CategorieController;
 use App\Http\Controllers\Admin\Depot\CycleController;
 use App\Http\Controllers\Admin\Depot\ExportController;
 use App\Http\Controllers\Admin\Depot\ReservationController as AdminReservationController;
+use App\Http\Controllers\Admin\Depot\StatistiqueController;
 use App\Http\Controllers\Admin\Depot\VetementController;
 use App\Http\Controllers\Depot\BonReservationController;
 use App\Http\Controllers\Depot\CatalogueController;
@@ -53,6 +54,9 @@ Route::middleware('auth')->prefix('admin/depot')->name('admin.depot.')->group(fu
 
     Route::get('export/vetements', [ExportController::class, 'vetements'])->name('export.vetements');
     Route::get('export/reservations', [ExportController::class, 'reservations'])->name('export.reservations');
+
+    Route::get('statistiques', [StatistiqueController::class, 'index'])->name('statistiques');
+    Route::get('statistiques/pdf', [StatistiqueController::class, 'pdf'])->name('statistiques.pdf');
 
     Route::post('vetements/analyser', [VetementController::class, 'analyser'])->name('vetements.analyser');
     Route::patch('vetements/{vetement}/approuver', [VetementController::class, 'approuver'])->name('vetements.approuver');
