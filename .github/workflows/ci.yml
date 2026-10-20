@@ -1,0 +1,183 @@
+name: Laravel CI et release
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    name: PHP 8.3 - syntaxe, tests et audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      DB_URL: ''
+      DB_FOREIGN_KEYS: 'true'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      DEPOT_IA_ACTIVE: 'false'
+      CAPTCHA_ACTIF: 'false'
+      TEST_TOKEN: ci-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Installer PHP 8.3 et Composer 2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, gd, iconv, mbstring, pdo_sqlite, sqlite3, tokenizer, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=512M
+
+      - name: Préparer les rapports
+        run: mkdir -p reports
+
+      - name: Valider et installer les dépendances verrouillées
+        id: install
+        run: |
+          composer validate --strict --no-check-publish
+          composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+          composer check-platform-reqs
+
+      - name: Configurer Laravel pour les tests
+        id: configure
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force --no-interaction
+          php artisan config:clear
+
+      - name: Vérifier la syntaxe PHP
+        id: lint
+        run: |
+          {
+            php -l artisan
+            while IFS= read -r -d '' file; do
+              php -l "$file"
+            done < <(find app bootstrap config database routes tests .github/ci -type f -name '*.php' -print0)
+          } | tee reports/php-lint.txt
+
+      - name: Exécuter la suite Laravel sur SQLite en mémoire
+        id: tests
+        run: php artisan test --bootstrap=.github/ci/bootstrap.php --log-junit=reports/junit.xml
+
+      - name: Auditer les dépendances Composer
+        id: audit
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: composer audit --locked --no-interaction --format=json | tee reports/composer-audit.json
+
+      - name: Conserver les rapports de contrôle
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: rapports-ci-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Afficher le bilan CI
+        if: ${{ always() }}
+        env:
+          CI_RESULT: ${{ job.status }}
+          INSTALL_RESULT: ${{ steps.install.outcome }}
+          CONFIG_RESULT: ${{ steps.configure.outcome }}
+          LINT_RESULT: ${{ steps.lint.outcome }}
+          TEST_RESULT: ${{ steps.tests.outcome }}
+          AUDIT_RESULT: ${{ steps.audit.outcome }}
+        run: |
+          {
+            printf '## CI Laravel : %s\n\n' "$CI_RESULT"
+            printf '| Contrôle | Résultat |\n|---|---|\n'
+            printf '| Composer | %s |\n' "$INSTALL_RESULT"
+            printf '| Configuration SQLite | %s |\n' "$CONFIG_RESULT"
+            printf '| Syntaxe PHP | %s |\n' "$LINT_RESULT"
+            printf '| Tests Laravel | %s |\n' "$TEST_RESULT"
+            printf '| Audit Composer | %s |\n' "$AUDIT_RESULT"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    name: Préparer un artefact de release
+    needs: ci
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+    steps:
+      - name: Récupérer la version validée
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Installer PHP 8.3 et Composer 2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, gd, iconv, mbstring, pdo_mysql, pdo_sqlite, tokenizer, xml, xmlwriter, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Assembler la release sans configuration privée
+        run: |
+          release_dir=$(mktemp -d "${RUNNER_TEMP:?}/textilecycle-release.XXXXXX")
+          artifact_dir="${RUNNER_TEMP:?}/textilecycle-artifacts"
+          mkdir -p "$artifact_dir"
+
+          # Seuls les chemins applicatifs versionnés sont exportés.
+          # Cela exclut .git, .env, les uploads, les bases, les logs et les tests.
+          git archive --format=tar HEAD app artisan bootstrap config database resources public routes storage composer.json composer.lock .env.example README.md docs |
+            tar -xf - -C "$release_dir"
+
+          composer install --working-dir="$release_dir" --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+          composer check-platform-reqs --working-dir="$release_dir" --no-dev
+          test -f "$release_dir/vendor/autoload.php"
+          test ! -e "$release_dir/vendor/phpunit"
+          test ! -e "$release_dir/.env"
+          test ! -e "$release_dir/public/storage"
+          test ! -e "$release_dir/bootstrap/cache/config.php"
+
+          php -r 'echo json_encode(["commit" => getenv("GITHUB_SHA"), "run_id" => getenv("GITHUB_RUN_ID"), "php" => PHP_VERSION], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), PHP_EOL;' > "$artifact_dir/release.json"
+          cp "$artifact_dir/release.json" "$release_dir/RELEASE.json"
+          archive="textilecycle-${GITHUB_SHA:?}.tar.gz"
+          tar -czf "$artifact_dir/$archive" -C "$release_dir" .
+          (cd "$artifact_dir" && sha256sum "$archive" > "$archive.sha256")
+
+      - name: Conserver l'artefact de release
+        uses: actions/upload-artifact@v6
+        with:
+          name: textilecycle-release-${{ github.sha }}
+          path: ${{ runner.temp }}/textilecycle-artifacts/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Afficher le bilan release
+        if: ${{ always() }}
+        env:
+          RELEASE_RESULT: ${{ job.status }}
+        run: |
+          {
+            printf '## Préparation de release : %s\n\n' "$RELEASE_RESULT"
+            printf 'Archive applicative, dépendances de production, manifeste et empreinte SHA-256.\n\n'
+            printf 'Aucun déploiement exécuté : une cible et ses secrets restent à configurer.\n'
+          } >> "$GITHUB_STEP_SUMMARY"
