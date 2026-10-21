@@ -18,8 +18,6 @@
   {{-- Tout est servi en local (plus de CDN ni de Google Fonts) : chargement plus rapide et site utilisable sans internet. --}}
   <link rel="preload" href="{{ asset_v('front/fonts/polices.css') }}" as="style">
   <link rel="stylesheet" href="{{ asset_v('front/vendor/bootstrap/bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ asset_v('front/css/vendor.css') }}">
-  <link rel="stylesheet" href="{{ asset_v('front/vendor/swiper/swiper-bundle.min.css') }}">
   <link rel="stylesheet" href="{{ asset_v('front/fonts/polices.css') }}">
   <link rel="stylesheet" href="{{ asset_v('front/style.css') }}">
   <link rel="stylesheet" href="{{ asset_v('front/css/custom.css') }}">
@@ -41,11 +39,7 @@
 
   @include('partials.front.footer')
 
-  <script src="{{ asset_v('front/js/jquery.min.js') }}"></script>
-  <script src="{{ asset_v('front/js/plugins.js') }}"></script>
   <script src="{{ asset_v('front/vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset_v('front/vendor/swiper/swiper-bundle.min.js') }}"></script>
-  <script src="{{ asset_v('front/js/script.min.js') }}"></script>
   <script src="{{ asset_v('front/js/mouvement.js') }}"></script>
   @stack('scripts')
 </body>

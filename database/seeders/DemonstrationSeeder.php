@@ -42,10 +42,18 @@ class DemonstrationSeeder extends Seeder
         $this->relierLesGestions($cycle);
 
         DemandeReparation::query()->whereNull('photo')->get()->each(function (DemandeReparation $demande) {
-            // Une demande créée depuis un vêtement du catalogue reprend la photo de ce vêtement.
-            $source = $demande->vetement?->photo ? storage_path('app/public/'.$demande->vetement->photo) : null;
+            // Une demande créée depuis un vêtement du catalogue reprend la photo de ce vêtement
+            // (lue par le disque « public » : fonctionne aussi avec un disque simulé dans les tests).
+            $photoVetement = $demande->vetement?->photo;
+            if ($photoVetement && Storage::disk('public')->exists($photoVetement)) {
+                $copie = DemandeReparation::PHOTO_DIRECTORY."/demo-reparation-{$demande->id}.".pathinfo($photoVetement, PATHINFO_EXTENSION);
+                Storage::disk('public')->copy($photoVetement, $copie);
+                $demande->update(['photo' => $copie]);
+
+                return;
+            }
             $demande->update(['photo' => $this->copier(
-                $source ?? public_path(self::IMAGES.self::PHOTOS_REPARATION[$demande->type_vetement->value ?? 'autre']),
+                public_path(self::IMAGES.self::PHOTOS_REPARATION[$demande->type_vetement->value ?? 'autre']),
                 DemandeReparation::PHOTO_DIRECTORY,
                 "reparation-{$demande->id}",
             )]);

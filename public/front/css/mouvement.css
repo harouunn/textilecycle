@@ -26,13 +26,13 @@
 .tc-hero-mouvement > .container { position: relative; z-index: 1; }
 .tc-hero-titre { font-family: "Marcellus", serif; font-size: clamp(2.6rem, 6.2vw, 5.6rem); line-height: 1.02; color: var(--tc-encre); letter-spacing: -.01em; margin: 1rem 0 1.5rem; }
 .tc-hero-titre .mot { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; }
-.tc-hero-titre .mot > span { display: inline-block; transform: translateY(110%); animation: tc-mot .9s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(var(--i) * 90ms + 150ms); }
+.tc-hero-titre .mot > span { display: inline-block; transform: translateY(110%); animation: tc-mot .5s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(var(--i) * 40ms + 40ms); }
 .tc-hero-titre em { font-style: italic; color: var(--tc-vert); }
 @keyframes tc-mot { to { transform: none; } }
 .tc-hero-texte { max-width: 470px; font-size: 1.1rem; opacity: 0; animation: tc-fondu .8s ease .8s forwards; }
 .tc-hero-actions { opacity: 0; animation: tc-fondu .8s ease 1s forwards; }
 @keyframes tc-fondu { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-.tc-hero-pastilles { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2.5rem; opacity: 0; animation: tc-fondu .8s ease 1.2s forwards; }
+.tc-hero-pastilles { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2.5rem; opacity: 0; animation: tc-fondu .5s ease .3s forwards; }
 .tc-hero-pastilles strong { display: block; font-family: "Marcellus", serif; font-size: 1.8rem; color: var(--tc-encre); line-height: 1; }
 .tc-hero-pastilles span { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
 

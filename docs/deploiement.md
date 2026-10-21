@@ -5,7 +5,7 @@ Deux façons d'installer le site : **avec Docker (recommandé)**, ou à la main 
 ## 0. Avec Docker (Docker Desktop ou serveur Linux)
 
 Le pipeline GitHub Actions publie à chaque version validée sur `main` l'image `ghcr.io/harouunn/textilecycle`
-(tags `latest` et numéro de commit). Trois conteneurs : `app` (PHP 8.3 + Apache), `scheduler` (tâche de 8 h), `db` (MySQL 8.4).
+(tags `latest` et numéro de commit). Quatre conteneurs : `app` (PHP 8.3 + Apache), `worker` (file d'attente), `scheduler` (tâche de 8 h), `db` (MySQL 8.4).
 
 ```bash
 # 1. Dans le dossier du projet, un fichier .env contenant au moins APP_KEY (et MAIL_* pour les vrais e-mails)
@@ -107,7 +107,11 @@ Chaque jour à 8 h, `depot:reservations` annule les réservations expirées et e
 * * * * * cd /chemin/vers/textilecycle && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Aucun « worker » de file d'attente n'est nécessaire : les e-mails partent directement.
+Un « worker » doit aussi tourner en permanence : il exécute en arrière-plan l'analyse de risque des dons (sinon elle reste en attente). Avec systemd ou Supervisor :
+
+```bash
+php artisan queue:work --tries=2 --sleep=3
+```
 
 ## 5. IA Ollama sur le serveur (facultatif)
 

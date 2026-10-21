@@ -123,3 +123,16 @@
     <a href="{{ route('depot.mes-depots.index') }}" class="tc-btn tc-btn--clair">Annuler</a>
   </div>
 </div>
+
+@isset($analyseRoute)
+  @push('scripts')
+    {{-- Charge le modèle d'IA en arrière-plan pendant que le client choisit sa photo : « Analyser » répond ensuite vite. --}}
+    <script>
+      fetch('{{ route('depot.mes-depots.ia.prechauffer') }}', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+        keepalive: true,
+      }).catch(() => {});
+    </script>
+  @endpush
+@endisset

@@ -95,6 +95,29 @@ class IntelligenceTest extends TestCase
         $this->assertStringStartsWith('Photo : couleur dominante', session('analyse')[0]);
     }
 
+    public function test_deposit_form_warms_up_the_model_in_the_background(): void
+    {
+        $this->actingAs(User::factory()->create())->get(route('depot.mes-depots.create'))
+            ->assertOk()
+            ->assertSee(route('depot.mes-depots.ia.prechauffer'), false);
+
+        config(['depot.ia.active' => true, 'depot.ia.modele' => 'gemma3:4b', 'depot.ia.url' => 'http://127.0.0.1:11434']);
+        Http::fake(['127.0.0.1:11434/api/generate' => Http::response(['done' => true])]);
+
+        $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.ia.prechauffer'))->assertNoContent();
+        Http::assertSent(fn ($requete) => $requete->url() === 'http://127.0.0.1:11434/api/generate'
+            && $requete['model'] === 'gemma3:4b' && $requete['keep_alive'] === '60m');
+    }
+
+    public function test_warm_up_does_nothing_when_the_ai_is_disabled(): void
+    {
+        Http::fake();
+        config(['depot.ia.active' => false]);
+
+        $this->actingAs(User::factory()->create())->post(route('depot.mes-depots.ia.prechauffer'))->assertStatus(202);
+        Http::assertNothingSent();
+    }
+
     public function test_status_reports_whether_the_model_is_installed(): void
     {
         config(['depot.ia.active' => true]);

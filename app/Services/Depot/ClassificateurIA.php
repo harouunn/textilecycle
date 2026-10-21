@@ -65,6 +65,25 @@ class ClassificateurIA
     }
 
     /**
+     * Charge le modèle sur la carte graphique sans rien analyser (requête vide), pour que la première
+     * analyse soit rapide. Appelée en arrière-plan dès l'ouverture du formulaire de dépôt.
+     */
+    public function prechauffer(): bool
+    {
+        if (! $this->disponible()) {
+            return false;
+        }
+
+        try {
+            return Http::connectTimeout(2)->timeout(90)->withOptions(['proxy' => ''])
+                ->post(config('depot.ia.url').'/api/generate', ['model' => config('depot.ia.modele'), 'keep_alive' => '60m'])
+                ->successful();
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    /**
      * @param  Collection<int, Categorie>  $categories
      * @return array{categorie_id: ?int, matiere: ?string, etat: Etat, genre: Genre, taille: ?Taille, couleur: string, uni: bool, description: string, indices: list<string>}|null
      */
@@ -115,7 +134,7 @@ class ClassificateurIA
                 'format' => $this->schema($nomsCategories),
                 // Température basse : on veut un classement stable, pas de créativité.
                 'options' => ['temperature' => 0.1, 'num_predict' => 800],
-                'keep_alive' => '30m',
+                'keep_alive' => '60m',
             ]);
 
         if (! $reponse->successful()) {

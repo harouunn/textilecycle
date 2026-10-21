@@ -37,6 +37,8 @@ Route::prefix('depot')->name('depot.')->group(function () {
         // « Déposer un vêtement » (create) et « Mes dépôts » (index, edit, update, destroy)
         Route::middleware('permission:'.Permissions::DEPOSER)->group(function () {
             Route::post('mes-depots/analyser', [MesDepotsController::class, 'analyser'])->name('mes-depots.analyser');
+            // Charge le modèle d'IA en arrière-plan dès l'ouverture du formulaire (analyse ensuite plus rapide).
+            Route::post('mes-depots/ia/prechauffer', [MesDepotsController::class, 'prechaufferIa'])->middleware('throttle:6,1')->name('mes-depots.ia.prechauffer');
             Route::resource('mes-depots', MesDepotsController::class)
                 ->except('show')
                 ->parameters(['mes-depots' => 'vetement']);

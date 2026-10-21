@@ -1,7 +1,7 @@
 # =============================================================================
 #  TexTileCycle avec Docker (Docker Desktop en local, ou un serveur Linux)
 #
-#  Lancer      : docker compose up -d            → http://localhost:8095
+#  Lancer      : docker compose up -d            → http://localhost:8095 (app, worker, scheduler, db)
 #  Mettre à jour (image publiée par la CI/CD) :
 #                docker compose pull && docker compose up -d
 #  Données démo: docker compose exec app php artisan db:seed --force
@@ -28,7 +28,7 @@ x-environnement: &environnement
   DB_PASSWORD: ${DOCKER_DB_PASSWORD:-textilecycle-local}
   SESSION_DRIVER: file
   CACHE_STORE: file
-  QUEUE_CONNECTION: sync
+  QUEUE_CONNECTION: database
   MAIL_MAILER: ${MAIL_MAILER:-log}
   MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
   MAIL_PORT: ${MAIL_PORT:-587}
@@ -69,6 +69,16 @@ services:
   scheduler:
     <<: *application
     command: ["php", "artisan", "schedule:work"]
+    environment:
+      <<: *environnement
+      MIGRER_AU_DEMARRAGE: "false"
+    healthcheck:
+      disable: true
+
+  # File d attente : analyse de risque des dons, faite en arrière-plan sans faire attendre l utilisateur.
+  worker:
+    <<: *application
+    command: ["php", "artisan", "queue:work", "--tries=2", "--sleep=3"]
     environment:
       <<: *environnement
       MIGRER_AU_DEMARRAGE: "false"

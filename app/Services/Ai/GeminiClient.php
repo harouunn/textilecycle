@@ -26,6 +26,9 @@ class GeminiClient implements AiClient
 
     private const NOUVELLES_TENTATIVES = 2;
 
+    /** Plus grand côté (en pixels) d'une image envoyée à Gemini. */
+    private const TAILLE_MAX_IMAGE = 1024;
+
     public function generateJson(string $prompt, array $schema, ?string $imagePath = null, ?string $systemInstruction = null): array
     {
         $key = (string) config('services.gemini.key');
@@ -109,6 +112,19 @@ class GeminiClient implements AiClient
         $data = is_readable($chemin) ? file_get_contents($chemin) : false;
         if ($data === false || $data === '') {
             throw new AiUnavailableException('Image illisible.');
+        }
+
+        // Une photo de téléphone (plusieurs Mo) est réduite à 1024 px avant l'envoi : envoi et analyse bien plus rapides.
+        $image = @imagecreatefromstring($data);
+        if ($image !== false && max(imagesx($image), imagesy($image)) > self::TAILLE_MAX_IMAGE) {
+            $ratio = self::TAILLE_MAX_IMAGE / max(imagesx($image), imagesy($image));
+            $reduite = imagescale($image, (int) round(imagesx($image) * $ratio), (int) round(imagesy($image) * $ratio));
+            if ($reduite !== false) {
+                ob_start();
+                imagejpeg($reduite, null, 85);
+
+                return ['mime' => 'image/jpeg', 'data' => (string) ob_get_clean()];
+            }
         }
 
         return ['mime' => mime_content_type($chemin) ?: 'image/jpeg', 'data' => $data];

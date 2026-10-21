@@ -11,8 +11,10 @@ use App\Http\Requests\Depot\StoreVetementRequest;
 use App\Http\Requests\Depot\UpdateVetementRequest;
 use App\Models\Categorie;
 use App\Models\Vetement;
+use App\Services\Depot\ClassificateurIA;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -65,6 +67,15 @@ class MesDepotsController extends Controller
     public function analyser(AnalyserVetementRequest $request): RedirectResponse
     {
         return $this->analyserPhoto($request, 'depot.mes-depots.create');
+    }
+
+    /**
+     * Appelée en arrière-plan par le formulaire de dépôt : charge le modèle d'IA pendant que le client
+     * choisit sa photo. Ne renvoie rien d'utile, ne bloque rien.
+     */
+    public function prechaufferIa(ClassificateurIA $ia): Response
+    {
+        return response()->noContent($ia->prechauffer() ? 204 : 202);
     }
 
     public function store(StoreVetementRequest $request): RedirectResponse
