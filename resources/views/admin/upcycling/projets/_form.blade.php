@@ -14,9 +14,11 @@
   </div>
 
   <div class="v-col-md-4 v-col-12">
-    <label for="statut" class="tcu-label">Statut <span class="text-error">*</span></label>
-    <input type="hidden" name="statut" value="brouillon">
-    <p>La publication se fait après soumission, depuis la fiche du projet.</p>
+    {{-- Le statut ne se choisit pas ici : il change seulement par la soumission et la décision de l'administrateur. --}}
+    <span class="tcu-label">Statut</span>
+    <input type="hidden" name="statut" value="{{ ($projet->statut ?? \App\Enums\Upcycling\StatutProjet::Brouillon)->value }}">
+    <p class="mb-1"><strong>{{ ($projet->statut ?? \App\Enums\Upcycling\StatutProjet::Brouillon)->label() }}</strong></p>
+    <p>La publication se fait après soumission, depuis la fiche du projet. Toute modification d'un projet publié le renvoie en brouillon.</p>
     @error('statut', 'projet') <div data-server-error class="tcu-error">{{ $message }}</div> @enderror
   </div>
 

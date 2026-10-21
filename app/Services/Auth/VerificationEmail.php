@@ -7,6 +7,7 @@ use App\Notifications\CodeVerificationEmail;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Throwable;
 
 /**
@@ -48,6 +49,27 @@ class VerificationEmail
         }
 
         return true;
+    }
+
+    /**
+     * Limite des renvois de code par compte (protège la boîte Gmail d'envoi, limitée à ~500 e-mails par jour) :
+     * 1 nouveau code par minute et 5 par heure. Renvoie le nombre de secondes à attendre, ou 0 si le renvoi est permis.
+     */
+    public function attenteAvantRenvoi(User $user): int
+    {
+        foreach ([["code-verification:{$user->id}:minute", 1, 60], ["code-verification:{$user->id}:heure", 5, 3600]] as [$cle, $max, $duree]) {
+            if (RateLimiter::tooManyAttempts($cle, $max)) {
+                return RateLimiter::availableIn($cle);
+            }
+        }
+
+        return 0;
+    }
+
+    public function compterRenvoi(User $user): void
+    {
+        RateLimiter::hit("code-verification:{$user->id}:minute", 60);
+        RateLimiter::hit("code-verification:{$user->id}:heure", 3600);
     }
 
     /**

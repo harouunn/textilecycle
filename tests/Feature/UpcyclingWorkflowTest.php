@@ -304,4 +304,16 @@ class UpcyclingWorkflowTest extends TestCase
         $this->actingAs($p->user)->post(route('upcycling.projets.soumettre', $p))->assertSessionHasNoErrors();
         $this->post(route('upcycling.projets.soumettre', $p))->assertForbidden();
     }
+
+    public function test_menu_admin_signale_les_projets_soumis_a_valider(): void
+    {
+        ProjetUpcycling::factory()->count(2)->create(['statut' => StatutProjet::Soumis]);
+        ProjetUpcycling::factory()->create(['statut' => StatutProjet::Publie]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.upcycling.projets.index', ['statut' => 'soumis']))
+            ->assertOk()
+            ->assertSeeText('Projets à valider')
+            ->assertSee(route('admin.upcycling.projets.index', ['statut' => 'soumis']), false);
+    }
 }

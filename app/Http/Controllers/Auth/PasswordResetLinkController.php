@@ -37,8 +37,9 @@ class PasswordResetLinkController extends Controller
             $request->only('email')
         );
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
+        // Même message que l'adresse existe ou non : le formulaire ne révèle pas qui a un compte.
+        return in_array($status, [Password::RESET_LINK_SENT, Password::INVALID_USER], true)
+                    ? back()->with('status', __(Password::RESET_LINK_SENT))
                     : back()->withInput($request->only('email'))
                         ->withErrors(['email' => __($status)]);
     }

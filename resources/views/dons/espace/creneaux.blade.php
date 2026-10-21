@@ -20,6 +20,10 @@
         <div class="card border-0 bg-light">
           <div class="card-body">
             <h2 class="h5 text-uppercase mb-3">Nouveau créneau</h2>
+            {{-- Un administrateur peut ouvrir l'espace sans être responsable d'une association : rien à proposer. --}}
+            @if ($associations->isEmpty())
+              <p class="mb-0">Vous n'êtes responsable d'aucune association : les créneaux se créent depuis le compte du responsable.</p>
+            @else
             <form method="POST" action="{{ route('dons.espace.creneaux.store') }}" novalidate>
               @csrf
               @if ($associations->count() > 1)
@@ -59,6 +63,7 @@
               </div>
               <button type="submit" class="btn btn-dark rounded-pill px-4">Ouvrir le créneau</button>
             </form>
+            @endif
           </div>
         </div>
       </div>

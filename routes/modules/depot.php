@@ -11,6 +11,8 @@
 |   - front office : URL /depot/..., noms de route "depot.*"
 |   - back office  : Route::middleware('auth')->prefix('admin/depot')->name('admin.depot.')
 |
+| Chaque groupe exige une permission Spatie (voir App\Support\Permissions), vérifiée côté serveur.
+|
 */
 
 use App\Http\Controllers\Admin\Depot\CategorieController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\Depot\BonReservationController;
 use App\Http\Controllers\Depot\CatalogueController;
 use App\Http\Controllers\Depot\MesDepotsController;
 use App\Http\Controllers\Depot\ReservationController;
+use App\Support\Permissions;
 use Illuminate\Support\Facades\Route;
 
 // Front office : catalogue public
@@ -32,44 +35,58 @@ Route::prefix('depot')->name('depot.')->group(function () {
 
     Route::middleware(['auth', 'verified'])->group(function () {
         // « Déposer un vêtement » (create) et « Mes dépôts » (index, edit, update, destroy)
-        Route::post('mes-depots/analyser', [MesDepotsController::class, 'analyser'])->name('mes-depots.analyser');
-        Route::resource('mes-depots', MesDepotsController::class)
-            ->except('show')
-            ->parameters(['mes-depots' => 'vetement']);
+        Route::middleware('permission:'.Permissions::DEPOSER)->group(function () {
+            Route::post('mes-depots/analyser', [MesDepotsController::class, 'analyser'])->name('mes-depots.analyser');
+            Route::resource('mes-depots', MesDepotsController::class)
+                ->except('show')
+                ->parameters(['mes-depots' => 'vetement']);
+        });
 
         // « Réserver ce vêtement » et « Mes réservations »
-        Route::get('catalogue/{vetement}/reserver', [ReservationController::class, 'create'])->name('reservations.create');
-        Route::post('catalogue/{vetement}/reserver', [ReservationController::class, 'store'])->name('reservations.store');
-        Route::get('mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
-        Route::patch('mes-reservations/{reservation}/annuler', [ReservationController::class, 'annuler'])->name('reservations.annuler');
-        Route::get('mes-reservations/{reservation}/bon', BonReservationController::class)->name('reservations.bon');
+        Route::middleware('permission:'.Permissions::RESERVER)->group(function () {
+            Route::get('catalogue/{vetement}/reserver', [ReservationController::class, 'create'])->name('reservations.create');
+            Route::post('catalogue/{vetement}/reserver', [ReservationController::class, 'store'])->name('reservations.store');
+            Route::get('mes-reservations', [ReservationController::class, 'index'])->name('reservations.index');
+            Route::patch('mes-reservations/{reservation}/annuler', [ReservationController::class, 'annuler'])->name('reservations.annuler');
+            Route::get('mes-reservations/{reservation}/bon', BonReservationController::class)->name('reservations.bon');
+        });
     });
 });
 
-// Back office
+// Back office : chaque partie exige sa permission (en plus du middleware admin global).
 Route::middleware('auth')->prefix('admin/depot')->name('admin.depot.')->group(function () {
-    Route::resource('categories', CategorieController::class)
-        ->except('show')
-        ->parameters(['categories' => 'categorie']);
+    Route::middleware('permission:'.Permissions::GERER_CATEGORIES)->group(function () {
+        Route::resource('categories', CategorieController::class)
+            ->except('show')
+            ->parameters(['categories' => 'categorie']);
+    });
 
-    Route::get('export/vetements', [ExportController::class, 'vetements'])->name('export.vetements');
-    Route::get('export/reservations', [ExportController::class, 'reservations'])->name('export.reservations');
+    Route::middleware('permission:'.Permissions::EXPORTER)->group(function () {
+        Route::get('export/vetements', [ExportController::class, 'vetements'])->name('export.vetements');
+        Route::get('export/reservations', [ExportController::class, 'reservations'])->name('export.reservations');
+    });
 
-    Route::get('statistiques', [StatistiqueController::class, 'index'])->name('statistiques');
-    Route::get('statistiques/pdf', [StatistiqueController::class, 'pdf'])->name('statistiques.pdf');
+    Route::middleware('permission:'.Permissions::VOIR_STATISTIQUES)->group(function () {
+        Route::get('statistiques', [StatistiqueController::class, 'index'])->name('statistiques');
+        Route::get('statistiques/pdf', [StatistiqueController::class, 'pdf'])->name('statistiques.pdf');
+    });
 
-    Route::post('vetements/analyser', [VetementController::class, 'analyser'])->name('vetements.analyser');
-    Route::patch('vetements/{vetement}/approuver', [VetementController::class, 'approuver'])->name('vetements.approuver');
-    Route::patch('vetements/{vetement}/refuser', [VetementController::class, 'refuser'])->name('vetements.refuser');
-    Route::resource('vetements', VetementController::class);
+    Route::middleware('permission:'.Permissions::MODERER_DEPOTS)->group(function () {
+        Route::post('vetements/analyser', [VetementController::class, 'analyser'])->name('vetements.analyser');
+        Route::patch('vetements/{vetement}/approuver', [VetementController::class, 'approuver'])->name('vetements.approuver');
+        Route::patch('vetements/{vetement}/refuser', [VetementController::class, 'refuser'])->name('vetements.refuser');
+        Route::resource('vetements', VetementController::class);
 
-    // Cycle du vêtement : il continue sa vie dans les autres gestions
-    Route::post('vetements/{vetement}/reparer', [CycleController::class, 'reparer'])->name('vetements.reparer');
-    Route::post('vetements/{vetement}/transformer', [CycleController::class, 'transformer'])->name('vetements.transformer');
-    Route::post('vetements/{vetement}/donner', [CycleController::class, 'donner'])->name('vetements.donner');
+        // Cycle du vêtement : il continue sa vie dans les autres gestions
+        Route::post('vetements/{vetement}/reparer', [CycleController::class, 'reparer'])->name('vetements.reparer');
+        Route::post('vetements/{vetement}/transformer', [CycleController::class, 'transformer'])->name('vetements.transformer');
+        Route::post('vetements/{vetement}/donner', [CycleController::class, 'donner'])->name('vetements.donner');
+    });
 
-    Route::patch('reservations/{reservation}/confirmer', [AdminReservationController::class, 'confirmer'])->name('reservations.confirmer');
-    Route::patch('reservations/{reservation}/retirer', [AdminReservationController::class, 'retirer'])->name('reservations.retirer');
-    Route::patch('reservations/{reservation}/annuler', [AdminReservationController::class, 'annuler'])->name('reservations.annuler');
-    Route::resource('reservations', AdminReservationController::class)->only(['index', 'show', 'destroy']);
+    Route::middleware('permission:'.Permissions::GERER_RESERVATIONS)->group(function () {
+        Route::patch('reservations/{reservation}/confirmer', [AdminReservationController::class, 'confirmer'])->name('reservations.confirmer');
+        Route::patch('reservations/{reservation}/retirer', [AdminReservationController::class, 'retirer'])->name('reservations.retirer');
+        Route::patch('reservations/{reservation}/annuler', [AdminReservationController::class, 'annuler'])->name('reservations.annuler');
+        Route::resource('reservations', AdminReservationController::class)->only(['index', 'show', 'destroy']);
+    });
 });

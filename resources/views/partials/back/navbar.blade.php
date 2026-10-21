@@ -35,7 +35,7 @@
         <div data-v-fba8a720 class="v-badge v-badge--bordered v-badge--dot">
           <div class="v-badge__wrapper">
             <button type="button" class="v-avatar v-theme--light text-primary v-avatar--density-default v-avatar--size-default v-avatar--variant-tonal cursor-pointer" data-user-menu-toggle aria-haspopup="menu" aria-expanded="false">
-              <span class="text-body-1 font-weight-medium">{{ $initials }}</span>
+              @if (Auth::user()->photo_profil)<x-ui.avatar :user="Auth::user()" taille="40" />@else<span class="text-body-1 font-weight-medium">{{ $initials }}</span>@endif
               <span class="v-avatar__underlay"></span>
             </button>
             <span class="v-badge__badge v-theme--light bg-success" style="top: calc(100% - 11px); left: calc(100% - 11px);"></span>
@@ -47,7 +47,7 @@
             <div class="v-list-item v-theme--light v-list-item--density-default v-list-item--one-line">
               <div class="v-list-item__prepend">
                 <div class="v-avatar v-theme--light text-primary v-avatar--density-default v-avatar--size-default v-avatar--variant-tonal me-3">
-                  <span class="text-body-1 font-weight-medium">{{ $initials }}</span>
+                  @if (Auth::user()->photo_profil)<x-ui.avatar :user="Auth::user()" taille="40" />@else<span class="text-body-1 font-weight-medium">{{ $initials }}</span>@endif
                   <span class="v-avatar__underlay"></span>
                 </div>
               </div>

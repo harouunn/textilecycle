@@ -52,7 +52,7 @@
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="dropdownAccount" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
-                    <svg width="18" height="18" viewBox="0 0 24 24" class="me-1"><use xlink:href="#user"></use></svg>
+                    <x-ui.avatar :user="Auth::user()" taille="28" class="me-2 align-middle" />
                     {{ Auth::user()->name }}
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end list-unstyled" aria-labelledby="dropdownAccount">

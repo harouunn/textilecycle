@@ -93,6 +93,9 @@ class ClassificateurIA
      */
     protected function appeler(string $cheminPhoto, ?string $titre, array $nomsCategories): ?array
     {
+        // PHP coupe une page après 30 s par défaut : le premier appel (chargement du modèle) peut durer plus.
+        set_time_limit((int) config('depot.ia.delai') + 30);
+
         $reponse = Http::acceptJson()
             ->connectTimeout(2)
             ->timeout(config('depot.ia.delai'))

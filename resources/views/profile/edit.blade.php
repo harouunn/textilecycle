@@ -45,11 +45,28 @@
         <div class="row g-4">
           {{-- Informations --}}
           <div class="col-lg-6">
-            <form method="POST" action="{{ route('profile.update') }}" class="tc-carte tc-form h-100" novalidate>
+            <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="tc-carte tc-form h-100" novalidate>
               @csrf
               @method('PATCH')
               <div class="tc-carte__entete"><h2>Informations</h2></div>
               <div class="tc-carte__corps">
+                {{-- Photo de profil : aperçu, nouvelle image ou retrait --}}
+                <div class="d-flex align-items-center gap-3 mb-4">
+                  <x-ui.avatar :user="$user" taille="72" />
+                  <div class="flex-grow-1">
+                    <label for="photo_profil" class="form-label mb-1">Photo de profil</label>
+                    <input id="photo_profil" type="file" name="photo_profil" accept="image/jpeg,image/png,image/webp"
+                      @class(['form-control', 'is-invalid' => $errors->has('photo_profil')])>
+                    @error('photo_profil') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="form-text">JPG, PNG ou WebP, 2 Mo maximum.</div>
+                    @if ($user->photo_profil)
+                      <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" name="supprimer_photo" value="1" id="supprimer_photo">
+                        <label class="form-check-label" for="supprimer_photo">Retirer ma photo</label>
+                      </div>
+                    @endif
+                  </div>
+                </div>
                 <div class="mb-3">
                   <label for="name" class="form-label">Nom complet</label>
                   <input id="name" type="text" name="name" value="{{ old('name', $user->name) }}" required autocomplete="name"

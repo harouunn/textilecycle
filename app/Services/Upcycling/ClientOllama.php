@@ -17,6 +17,8 @@ class ClientOllama implements FournisseurIA
         if ($base !== 'http://127.0.0.1:11434' || $model !== 'qwen3:8b' || ! is_numeric($timeout) || $timeout < 1 || $timeout > 300) {
             throw new AssistantIndisponible('La configuration Ollama locale est invalide. Vérifiez OLLAMA_BASE_URL et OLLAMA_MODEL.', 'invalid_configuration');
         }
+        // PHP coupe une page après 30 s par défaut : on laisse à Ollama tout son délai (chargement du modèle compris).
+        set_time_limit((int) $timeout + 30);
         try {
             $response = Http::acceptJson()->connectTimeout(3)->timeout((float) $timeout)
                 ->withOptions(['allow_redirects' => false, 'proxy' => ''])

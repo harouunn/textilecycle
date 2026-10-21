@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Notifications\ReinitialisationMotDePasse;
 use App\Services\Auth\VerificationEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -13,6 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role as SpatieRole;
+use Spatie\Permission\Traits\HasRoles;
 
 // Le rôle n'est rempli que par le back office (UserRequest) : l'inscription ne transmet que nom, email et mot de passe.
 #[Fillable(['name', 'email', 'role', 'password'])]
@@ -20,7 +25,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * @var array<string, mixed>
@@ -28,6 +33,18 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $attributes = [
         'role' => 'client',
     ];
+
+    /**
+     * Le rôle Spatie (et donc ses permissions) suit toujours la colonne users.role.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (User $user) {
+            if ($user->wasRecentlyCreated || $user->wasChanged('role')) {
+                $user->syncRoles([SpatieRole::findOrCreate($user->role->value, 'web')]);
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -54,6 +71,33 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         app(VerificationEmail::class)->envoyerCode($this);
+    }
+
+    /**
+     * Lien « Mot de passe oublié » envoyé par un e-mail en français.
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ReinitialisationMotDePasse($token));
+    }
+
+    /**
+     * URL de la photo de profil, ou null (les vues affichent alors les initiales).
+     */
+    public function photoProfilUrl(): ?string
+    {
+        return $this->photo_profil ? Storage::disk('public')->url($this->photo_profil) : null;
+    }
+
+    /**
+     * Initiales affichées à la place de la photo (ex. « Alaa Tahri » → « AT »).
+     */
+    public function initiales(): string
+    {
+        return Str::upper(collect(preg_split('/\s+/', trim((string) $this->name)))
+            ->filter()->take(2)->map(fn (string $mot) => Str::substr($mot, 0, 1))->implode('')) ?: '?';
     }
 
     public function isAdmin(): bool
