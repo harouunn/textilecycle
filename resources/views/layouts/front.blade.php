@@ -39,6 +39,7 @@
   <script src="{{ asset('front/vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('front/vendor/swiper/swiper-bundle.min.js') }}"></script>
   <script src="{{ asset('front/js/script.min.js') }}"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   @stack('scripts')
 </body>
 

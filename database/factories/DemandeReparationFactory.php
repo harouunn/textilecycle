@@ -39,6 +39,11 @@ class DemandeReparationFactory extends Factory
             'description' => $description,
             'photo' => null,
             'statut' => StatutDemande::EnAttente,
+            // Valeurs par défaut pour les champs requis
+            'reparations' => [\App\Enums\Ateliers\TypeReparation::AExpertiser],
+            'cout_estime' => 0,
+            'delai_estime_jours' => 0,
+            'diagnostic' => 'Diagnostic en attente',
         ];
     }
 
@@ -48,7 +53,9 @@ class DemandeReparationFactory extends Factory
     public function configure(): static
     {
         return $this->afterMaking(function (DemandeReparation $demande) {
-            if ($demande->cout_estime === null) {
+            // Diagnostiquer seulement si cout_estime est toujours à 0 (valeur par défaut)
+            // et que analyse_statut n'a pas été explicitement défini
+            if ($demande->cout_estime == 0 && $demande->analyse_statut === null && $demande->diagnostic === 'Diagnostic en attente') {
                 $demande->diagnostiquer();
             }
         });

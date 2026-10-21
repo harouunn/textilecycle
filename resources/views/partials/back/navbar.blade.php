@@ -25,10 +25,12 @@
         <span class="v-btn__content"><i class="bx-store-alt v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
       </a>
 
-      <button data-v-fba8a720 type="button" class="v-btn v-btn--icon v-theme--light text-default v-btn--density-default v-btn--size-default v-btn--variant-text me-1" title="Notifications">
-        <span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
-        <span class="v-btn__content"><i class="bx-bell v-icon notranslate v-theme--light v-icon--size-default" aria-hidden="true"></i></span>
-      </button>
+      <x-notifications-bell 
+        variant="back-office" 
+        iconClass="v-icon notranslate v-theme--light v-icon--size-default"
+        badgeClass="badge-back"
+        dropdownClass="dropdown-back"
+      />
 
       {{-- Menu utilisateur --}}
       <div class="position-relative">

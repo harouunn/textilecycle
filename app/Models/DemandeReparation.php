@@ -41,6 +41,12 @@ class DemandeReparation extends Model
         'cout_estime',
         'delai_estime_jours',
         'diagnostic',
+        'analyse_statut',
+        'admin_notifie',
+        'analyse_vision',
+        'analyse_texte',
+        'analysed_at',
+        'analyse_message',
         'statut',
         'cout_final',
         'date_prevue',
@@ -52,6 +58,7 @@ class DemandeReparation extends Model
      */
     protected $attributes = [
         'statut' => 'en_attente',
+        'admin_notifie' => false,
     ];
 
     /**
@@ -67,6 +74,9 @@ class DemandeReparation extends Model
             'statut' => StatutDemande::class,
             'cout_final' => 'decimal:2',
             'date_prevue' => 'date',
+            'analyse_vision' => 'array',
+            'analyse_texte' => 'array',
+            'analysed_at' => 'datetime',
         ];
     }
 
@@ -108,12 +118,22 @@ class DemandeReparation extends Model
             ->when($this->exists, fn (Builder $query) => $query->whereKeyNot($this->getKey()))
             ->count();
 
-        $diagnostic = app(DiagnosticReparation::class)->analyser(
-            $this->description,
-            (bool) $this->photo,
-            $this->type_vetement,
-            $demandesEnCours,
-        );
+        try {
+            $diagnostic = app(DiagnosticReparation::class)->analyser(
+                $this->description,
+                (bool) $this->photo,
+                $this->type_vetement,
+                $demandesEnCours,
+            );
+        } catch (\Exception $e) {
+            // En cas d'erreur, fournir un diagnostic par défaut
+            $diagnostic = [
+                'reparations' => [\App\Enums\Ateliers\TypeReparation::AExpertiser],
+                'cout_estime' => 0,
+                'delai_estime_jours' => 0,
+                'diagnostic' => 'Analyse automatique indisponible. Cette demande sera traitée manuellement.',
+            ];
+        }
 
         return $this->fill($diagnostic);
     }

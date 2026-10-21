@@ -128,6 +128,18 @@ class DemandeReparationController extends Controller
     }
 
     /**
+     * Relancer l'analyse IA de la demande.
+     */
+    public function reanalyse(DemandeReparation $demande): RedirectResponse
+    {
+        \App\Jobs\AnalyserDemandeJob::dispatch($demande, true);
+
+        return redirect()
+            ->route('admin.ateliers.demandes.show', $demande)
+            ->with('success', 'Analyse IA relancée.');
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function formData(DemandeReparation $demande): array
