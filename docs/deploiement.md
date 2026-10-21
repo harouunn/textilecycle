@@ -1,6 +1,30 @@
 # Mettre TexTileCycle en ligne
 
-Ce guide explique comment installer le site sur un serveur (VPS Linux, ou hébergement mutualisé avec accès SSH).
+Deux façons d'installer le site : **avec Docker (recommandé)**, ou à la main sur un serveur PHP (sections 1 à 8).
+
+## 0. Avec Docker (Docker Desktop ou serveur Linux)
+
+Le pipeline GitHub Actions publie à chaque version validée sur `main` l'image `ghcr.io/harouunn/textilecycle`
+(tags `latest` et numéro de commit). Trois conteneurs : `app` (PHP 8.3 + Apache), `scheduler` (tâche de 8 h), `db` (MySQL 8.4).
+
+```bash
+# 1. Dans le dossier du projet, un fichier .env contenant au moins APP_KEY (et MAIL_* pour les vrais e-mails)
+# 2. Récupérer l'image publiée et démarrer
+docker compose pull
+docker compose up -d                                   # → http://localhost:8095
+# 3. Facultatif : données de démonstration (comptes au mot de passe « password », jamais en production)
+docker compose exec app php artisan db:seed --force
+# Mise à jour vers la dernière version validée
+docker compose pull && docker compose up -d
+```
+
+Sans accès au registre, `docker compose up -d --build` construit l'image depuis le code.
+Au démarrage, le conteneur attend MySQL, applique les migrations, relie le dossier des photos et met Laravel en cache.
+Les données restent dans les volumes `base` (MySQL) et `fichiers` (photos) : `docker compose down` ne les efface pas.
+
+**Déploiement continu** : si les variables `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH` et le secret `DEPLOY_SSH_KEY`
+sont définis dans GitHub (Settings → Secrets and variables → Actions), le job `deploy` se connecte au serveur après chaque
+version validée, lance `docker compose pull && docker compose up -d` et vérifie que `/up` répond.
 
 ## 1. Prérequis
 

@@ -1,0 +1,92 @@
+# =============================================================================
+#  TexTileCycle avec Docker (Docker Desktop en local, ou un serveur Linux)
+#
+#  Lancer      : docker compose up -d            → http://localhost:8095
+#  Mettre à jour (image publiée par la CI/CD) :
+#                docker compose pull && docker compose up -d
+#  Données démo: docker compose exec app php artisan db:seed --force
+#  Arrêter     : docker compose down             (les données restent dans les volumes)
+#
+#  Les secrets (APP_KEY, mot de passe Gmail) sont lus dans le fichier .env du dossier,
+#  jamais écrits ici. La base MySQL et les photos déposées vivent dans des volumes.
+# =============================================================================
+name: textilecycle
+
+x-environnement: &environnement
+  APP_NAME: TexTileCycle
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_KEY: ${APP_KEY:?Définissez APP_KEY dans le fichier .env}
+  APP_URL: ${DOCKER_APP_URL:-http://localhost:8095}
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: warning
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: "3306"
+  DB_DATABASE: textilecycle
+  DB_USERNAME: textilecycle
+  DB_PASSWORD: ${DOCKER_DB_PASSWORD:-textilecycle-local}
+  SESSION_DRIVER: file
+  CACHE_STORE: file
+  QUEUE_CONNECTION: sync
+  MAIL_MAILER: ${MAIL_MAILER:-log}
+  MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+  MAIL_PORT: ${MAIL_PORT:-587}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@textilecycle.local}
+  MAIL_FROM_NAME: TexTileCycle
+  CAPTCHA_ACTIF: ${CAPTCHA_ACTIF:-true}
+  # IA de vision du module Dépôt : l'Ollama de l'ordinateur hôte (Docker Desktop).
+  DEPOT_IA_ACTIVE: ${DEPOT_IA_ACTIVE:-true}
+  DEPOT_OLLAMA_URL: http://host.docker.internal:11434
+  DEPOT_OLLAMA_MODELE: ${DEPOT_OLLAMA_MODELE:-gemma3:4b}
+
+x-application: &application
+  image: ${TEXTILECYCLE_IMAGE:-ghcr.io/harouunn/textilecycle:latest}
+  build: .
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  volumes:
+    - fichiers:/var/www/html/storage/app/public
+  environment: *environnement
+
+services:
+  app:
+    <<: *application
+    ports:
+      - "${DOCKER_APP_PORT:-8095}:80"
+
+  # Tâche quotidienne de 8 h (expiration des réservations, rappels) : le planificateur Laravel.
+  scheduler:
+    <<: *application
+    command: ["php", "artisan", "schedule:work"]
+    environment:
+      <<: *environnement
+      MIGRER_AU_DEMARRAGE: "false"
+    healthcheck:
+      disable: true
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: textilecycle
+      MYSQL_USER: textilecycle
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:-textilecycle-local}
+      MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASSWORD:-textilecycle-root}
+    volumes:
+      - base:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DOCKER_DB_ROOT_PASSWORD:-textilecycle-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  base:
+  fichiers:
