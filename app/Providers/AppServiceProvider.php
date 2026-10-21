@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\DemandeReparation;
+use App\Observers\DemandeReparationObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -34,5 +36,8 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->isProduction() && str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // Module Ateliers : notifications et analyse IA à chaque nouvelle demande de réparation.
+        DemandeReparation::observe(DemandeReparationObserver::class);
     }
 }

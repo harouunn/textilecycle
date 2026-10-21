@@ -49,6 +49,14 @@
               </li>
 
               @auth
+                <li class="nav-item">
+                  <x-notifications-bell 
+                    variant="front-office"
+                    iconClass="bx"
+                    badgeClass="badge-front"
+                    dropdownClass="dropdown-front"
+                  />
+                </li>
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="dropdownAccount" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">

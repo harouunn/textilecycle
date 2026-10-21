@@ -41,6 +41,8 @@
 
   <script src="{{ asset_v('front/vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset_v('front/js/mouvement.js') }}"></script>
+  {{-- Alpine.js (cloche de notifications du module Ateliers), copie locale à version fixe --}}
+  <script defer src="{{ asset_v('vendor/alpinejs/alpine.min.js') }}"></script>
   @stack('scripts')
 </body>
 

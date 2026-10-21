@@ -13,7 +13,6 @@
 |
 */
 
-
 use App\Http\Controllers\Admin\Ateliers\AtelierController as AdminAtelierController;
 use App\Http\Controllers\Admin\Ateliers\DemandeReparationController as AdminDemandeReparationController;
 use App\Http\Controllers\Ateliers\AtelierController;
@@ -36,6 +35,7 @@ Route::prefix('ateliers')->name('ateliers.')->group(function () {
 // Back office
 Route::middleware('auth')->prefix('admin/ateliers')->name('admin.ateliers.')->group(function () {
     Route::patch('demandes/{demande}/traiter', [AdminDemandeReparationController::class, 'traiter'])->name('demandes.traiter');
+    Route::post('demandes/{demande}/reanalyse', [AdminDemandeReparationController::class, 'reanalyse'])->name('demandes.reanalyse');
     Route::resource('demandes', AdminDemandeReparationController::class)
         ->parameters(['demandes' => 'demande']);
 });
@@ -44,4 +44,3 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('ateliers', AdminAtelierController::class)
         ->where(['atelier' => '[0-9]+']);
 });
-

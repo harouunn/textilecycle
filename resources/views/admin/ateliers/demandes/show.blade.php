@@ -63,6 +63,72 @@
           <div class="text-overline mb-1">Diagnostic automatique</div>
           <p class="text-body-2 mb-6" style="white-space: pre-line;">{{ $demande->diagnostic }}</p>
 
+          {{-- Suggestions IA --}}
+          @if ($demande->analysed_at)
+            <div class="v-card v-theme--light v-card--density-default v-card--variant-tonal mb-6" style="background-color: rgba(var(--v-theme-primary), 0.05);">
+              <div class="v-card-item">
+                <div class="v-card-item__content">
+                  <div class="v-card-title d-flex align-center gap-2">
+                    <i class="bx bx-brain"></i>
+                    Suggestions IA
+                  </div>
+                  <div class="v-card-subtitle">Analysé le {{ $demande->analysed_at->format('d/m/Y à H:i') }}</div>
+                </div>
+              </div>
+              <div class="v-card-text">
+                @if ($demande->analyse_statut === 'erreur')
+                  <p class="text-warning mb-2">⚠️ Analyse indisponible, à traiter manuellement</p>
+                  
+                  @if ($demande->analyse_message)
+                    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3" style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px;">
+                      <i class="bx bx-error-circle" style="font-size: 24px; color: #ffc107;"></i>
+                      <strong>{{ $demande->analyse_message }}</strong>
+                    </div>
+                  @endif
+                @endif
+
+                @if ($demande->analyse_vision)
+                  <div class="mb-3">
+                    <strong>Analyse photo :</strong><br>
+                    Type: {{ $demande->analyse_vision['type_dommage'] ?? 'N/A' }}<br>
+                    Gravité: {{ $demande->analyse_vision['gravite'] ?? 'N/A' }}<br>
+                    Temps estimé: {{ $demande->analyse_vision['temps_estime_min'] ?? 'N/A' }} min
+                  </div>
+                @endif
+
+                @if ($demande->analyse_texte)
+                  <div class="mb-3">
+                    <strong>Analyse texte :</strong><br>
+                    {{ $demande->analyse_texte['resume'] ?? 'N/A' }}<br>
+                    @if ($demande->analyse_texte['atelier_recommande_id'] ?? null)
+                      Atelier conseillé: {{ \App\Models\Atelier::find($demande->analyse_texte['atelier_recommande_id'])?->nom ?? 'Inconnu' }}<br>
+                    @endif
+                    Priorité: 
+                    @php
+                      $priorite = $demande->analyse_texte['priorite'] ?? 'normale';
+                      $badgeColor = match($priorite) {
+                        'haute' => 'error',
+                        'basse' => 'success',
+                        default => 'default',
+                      };
+                    @endphp
+                    @include('admin.depot.partials.chip', ['label' => ucfirst($priorite), 'color' => $badgeColor])
+                  </div>
+                @endif
+
+                <form method="POST" action="{{ route('admin.ateliers.demandes.reanalyse', $demande) }}" class="d-inline">
+                  @csrf
+                  @include('admin.depot.partials.btn', ['label' => 'Relancer l\'analyse', 'icon' => 'bx-refresh', 'variant' => 'tonal', 'size' => 'small'])
+                </form>
+              </div>
+              <span class="v-card__underlay"></span>
+            </div>
+          @elseif ($demande->analyse_statut === null)
+            <div class="v-alert v-theme--light text-info mb-6" role="alert">
+              <i class="bx bx-info-circle"></i> Analyse en cours...
+            </div>
+          @endif
+
           <div class="d-flex flex-wrap gap-4">
             @include('admin.depot.partials.btn', ['label' => 'Modifier', 'icon' => 'bx-edit-alt', 'href' => route('admin.ateliers.demandes.edit', $demande)])
             <form method="POST" action="{{ route('admin.ateliers.demandes.destroy', $demande) }}" class="d-inline" onsubmit="return confirm(@js("Supprimer la demande « {$demande->titre} » ?"))">
