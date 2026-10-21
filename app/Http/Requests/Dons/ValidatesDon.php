@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Dons;
 
-use App\Models\Don;
+use App\Enums\Dons\EtatGeneral;
+use App\Enums\Dons\ModeRemise;
+use App\Enums\Dons\TypeArticle;
 use Illuminate\Validation\Rule;
 
 /**
@@ -18,11 +20,11 @@ trait ValidatesDon
     protected function donRules(bool $checkDate = true): array
     {
         return [
-            'type_article' => ['required', Rule::in(array_keys(Don::TYPES))],
+            'type_article' => ['required', Rule::enum(TypeArticle::class)],
             'quantite' => ['required', 'integer', 'min:1', 'max:500'],
             'poids_kg' => ['nullable', 'numeric', 'min:0.1', 'max:5000'],
-            'etat_general' => ['required', Rule::in(array_keys(Don::ETATS))],
-            'mode_remise' => ['required', Rule::in(array_keys(Don::MODES))],
+            'etat_general' => ['required', Rule::enum(EtatGeneral::class)],
+            'mode_remise' => ['required', Rule::enum(ModeRemise::class)],
             'date_remise' => $checkDate ? ['required', 'date', 'after_or_equal:today'] : ['required', 'date'],
             'adresse_collecte' => ['nullable', 'required_if:mode_remise,collecte_a_domicile', 'string', 'max:255'],
             'message' => ['nullable', 'string', 'max:1000'],
@@ -31,13 +33,18 @@ trait ValidatesDon
 
     public function messages(): array
     {
+        return $this->donMessages();
+    }
+
+    protected function donMessages(): array
+    {
         return [
             'association_id.required' => 'Veuillez choisir une association.',
             'association_id.exists' => 'L\'association sélectionnée est invalide.',
             'user_id.required' => 'Veuillez choisir un donateur.',
             'user_id.exists' => 'Le donateur sélectionné est invalide.',
             'type_article.required' => 'Le type d\'article est obligatoire.',
-            'type_article.in' => 'Le type d\'article sélectionné est invalide.',
+            'type_article.enum' => 'Le type d\'article sélectionné est invalide.',
             'quantite.required' => 'La quantité est obligatoire.',
             'quantite.integer' => 'La quantité doit être un nombre entier.',
             'quantite.min' => 'La quantité doit être d\'au moins :min article.',
@@ -46,9 +53,9 @@ trait ValidatesDon
             'poids_kg.min' => 'Le poids doit être d\'au moins :min kg.',
             'poids_kg.max' => 'Le poids ne peut pas dépasser :max kg.',
             'etat_general.required' => 'L\'état général est obligatoire.',
-            'etat_general.in' => 'L\'état général sélectionné est invalide.',
+            'etat_general.enum' => 'L\'état général sélectionné est invalide.',
             'mode_remise.required' => 'Le mode de remise est obligatoire.',
-            'mode_remise.in' => 'Le mode de remise sélectionné est invalide.',
+            'mode_remise.enum' => 'Le mode de remise sélectionné est invalide.',
             'date_remise.required' => 'La date de remise est obligatoire.',
             'date_remise.date' => 'La date de remise n\'est pas une date valide.',
             'date_remise.after_or_equal' => 'La date de remise doit être aujourd\'hui ou une date future.',
@@ -56,7 +63,7 @@ trait ValidatesDon
             'adresse_collecte.max' => 'L\'adresse de collecte ne peut pas dépasser :max caractères.',
             'message.max' => 'Le message ne peut pas dépasser :max caractères.',
             'statut.required' => 'Le statut est obligatoire.',
-            'statut.in' => 'Le statut sélectionné est invalide.',
+            'statut.enum' => 'Le statut sélectionné est invalide.',
         ];
     }
 
@@ -67,7 +74,7 @@ trait ValidatesDon
     {
         $data = parent::validated($key, $default);
 
-        if ($key === null && ($data['mode_remise'] ?? null) !== 'collecte_a_domicile') {
+        if ($key === null && ($data['mode_remise'] ?? null) !== ModeRemise::CollecteADomicile->value) {
             $data['adresse_collecte'] = null;
         }
 

@@ -73,6 +73,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Appels aux API d'IA (Gemini) : durée, statut, erreurs. Jamais le contenu des photos ni la clé.
+        'ai' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ai.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'max_files' => 14,
+            'replace_placeholders' => true,
+        ],
+
         'monthly' => [
             'driver' => 'monthly',
             'path' => storage_path('logs/laravel.log'),

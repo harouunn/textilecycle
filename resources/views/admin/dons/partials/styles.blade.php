@@ -41,6 +41,16 @@
   .tcd-pagination .disabled span { opacity: .45; }
   .tcd-pre { white-space: pre-line; }
   .tcd-inline { display: inline; }
+  .tcd-progress { height: 8px; border-radius: 4px; overflow: hidden; background: rgba(var(--v-theme-on-surface), .08); }
+  .tcd-progress-bar { height: 100%; border-radius: 4px; }
+  .tcd-timeline { list-style: none; margin: 0; padding: 0; }
+  .tcd-timeline li { position: relative; padding: 0 0 1.25rem 2.25rem; }
+  .tcd-timeline li:last-child { padding-bottom: 0; }
+  .tcd-timeline li::before { content: ""; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: rgba(var(--v-border-color), .16); }
+  .tcd-timeline li:last-child::before { display: none; }
+  .tcd-timeline-dot { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .875rem; background: rgba(var(--v-theme-on-surface), .06); }
+  .tcd-timeline-meta { font-size: .8125rem; color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity)); }
+  .tcd-timeline-comment { margin-top: .25rem; white-space: pre-line; }
 </style>
 @endpush
 @endonce

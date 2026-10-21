@@ -1,7 +1,8 @@
 {{--
   Sneat button.
   Paramètres : label, href (lien) ou type (bouton), color (défaut primary), variant (elevated|tonal|outlined|text),
-  size (default|small), icon (classe boxicons), title, confirm (message de confirmation)
+  size (default|small), icon (classe boxicons), title, confirm (message de confirmation),
+  attributs (tableau d'attributs HTML supplémentaires, ex. data-*)
 --}}
 @php
   $color = $color ?? 'primary';
@@ -14,7 +15,8 @@
   <a href="{{ $href }}" class="{{ $classes }}" @isset($title) title="{{ $title }}" aria-label="{{ $title }}" @endisset>
 @else
   <button type="{{ $type ?? 'submit' }}" class="{{ $classes }}" @isset($title) title="{{ $title }}" aria-label="{{ $title }}" @endisset
-    @isset($confirm) onclick="return confirm(@js($confirm))" @endisset>
+    @isset($confirm) onclick="return confirm(@js($confirm))" @endisset
+    @foreach ($attributs ?? [] as $attribut => $valeur) {{ $attribut }}="{{ $valeur }}" @endforeach>
 @endisset
     <span class="v-btn__overlay"></span><span class="v-btn__underlay"></span>
     <span class="v-btn__content">

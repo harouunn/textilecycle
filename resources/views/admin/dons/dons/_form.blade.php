@@ -1,5 +1,5 @@
 {{-- Donation form (create / edit). Paramètres : don, associations, users, action, method --}}
-@php($mode = old('mode_remise', $don->mode_remise))
+@php($mode = old('mode_remise', $don->mode_remise?->value))
 
 <form method="POST" action="{{ $action }}" novalidate>
   @csrf
@@ -43,8 +43,8 @@
                 <label for="type_article" class="tcd-label">Type d'article <span class="tcd-required">*</span></label>
                 <select id="type_article" name="type_article" @class(['tcd-input', 'is-invalid' => $errors->has('type_article')]) required>
                   <option value="">— Choisir —</option>
-                  @foreach (\App\Models\Don::TYPES as $optValue => $optLabel)
-                    <option value="{{ $optValue }}" @selected(old('type_article', $don->type_article) === $optValue)>{{ $optLabel }}</option>
+                  @foreach (\App\Enums\Dons\TypeArticle::options() as $optValue => $optLabel)
+                    <option value="{{ $optValue }}" @selected(old('type_article', $don->type_article?->value) === $optValue)>{{ $optLabel }}</option>
                   @endforeach
                 </select>
                 @error('type_article') <div class="tcd-error">{{ $message }}</div> @enderror
@@ -55,8 +55,8 @@
                 <label for="etat_general" class="tcd-label">État général <span class="tcd-required">*</span></label>
                 <select id="etat_general" name="etat_general" @class(['tcd-input', 'is-invalid' => $errors->has('etat_general')]) required>
                   <option value="">— Choisir —</option>
-                  @foreach (\App\Models\Don::ETATS as $optValue => $optLabel)
-                    <option value="{{ $optValue }}" @selected(old('etat_general', $don->etat_general) === $optValue)>{{ $optLabel }}</option>
+                  @foreach (\App\Enums\Dons\EtatGeneral::options() as $optValue => $optLabel)
+                    <option value="{{ $optValue }}" @selected(old('etat_general', $don->etat_general?->value) === $optValue)>{{ $optLabel }}</option>
                   @endforeach
                 </select>
                 @error('etat_general') <div class="tcd-error">{{ $message }}</div> @enderror
@@ -98,7 +98,7 @@
           <div class="tcd-field">
             <label for="mode_remise" class="tcd-label">Mode de remise <span class="tcd-required">*</span></label>
             <select id="mode_remise" name="mode_remise" @class(['tcd-input', 'is-invalid' => $errors->has('mode_remise')]) required data-toggle-collecte>
-              @foreach (\App\Models\Don::MODES as $optValue => $optLabel)
+              @foreach (\App\Enums\Dons\ModeRemise::options() as $optValue => $optLabel)
                 <option value="{{ $optValue }}" @selected($mode === $optValue)>{{ $optLabel }}</option>
               @endforeach
             </select>
@@ -117,15 +117,23 @@
             @error('date_remise') <div class="tcd-error">{{ $message }}</div> @enderror
           </div>
 
-          <div class="tcd-field mb-0">
-            <label for="statut" class="tcd-label">Statut <span class="tcd-required">*</span></label>
-            <select id="statut" name="statut" @class(['tcd-input', 'is-invalid' => $errors->has('statut')]) required>
-              @foreach (\App\Models\Don::STATUTS as $optValue => $optLabel)
-                <option value="{{ $optValue }}" @selected(old('statut', $don->statut) === $optValue)>{{ $optLabel }}</option>
-              @endforeach
-            </select>
-            @error('statut') <div class="tcd-error">{{ $message }}</div> @enderror
-          </div>
+          @if ($don->exists)
+            <div class="tcd-field mb-0">
+              <span class="tcd-label">Statut</span>
+              @include('admin.dons.partials.statut', ['don' => $don])
+              <div class="tcd-hint">Le statut se change depuis la fiche du don, selon les étapes autorisées.</div>
+            </div>
+          @else
+            <div class="tcd-field mb-0">
+              <label for="statut" class="tcd-label">Statut initial <span class="tcd-required">*</span></label>
+              <select id="statut" name="statut" @class(['tcd-input', 'is-invalid' => $errors->has('statut')]) required>
+                @foreach (\App\Enums\Dons\DonStatut::options() as $optValue => $optLabel)
+                  <option value="{{ $optValue }}" @selected(old('statut', $don->statut?->value) === $optValue)>{{ $optLabel }}</option>
+                @endforeach
+              </select>
+              @error('statut') <div class="tcd-error">{{ $message }}</div> @enderror
+            </div>
+          @endif
         </div>
         <span class="v-card__underlay"></span>
       </div>

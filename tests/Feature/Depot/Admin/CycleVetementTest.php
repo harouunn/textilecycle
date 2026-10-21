@@ -4,6 +4,8 @@ namespace Tests\Feature\Depot\Admin;
 
 use App\Enums\Ateliers\TypeVetement;
 use App\Enums\Depot\StatutVetement;
+use App\Enums\Dons\EtatGeneral;
+use App\Enums\Dons\TypeArticle;
 use App\Enums\Upcycling\StatutProjet;
 use App\Models\Association;
 use App\Models\Atelier;
@@ -74,8 +76,8 @@ class CycleVetementTest extends TestCase
 
         $don = Don::query()->sole();
         $this->assertSame($vetement->id, $don->vetement_id);
-        $this->assertSame('vetements_femme', $don->type_article);
-        $this->assertSame('moyen', $don->etat_general);
+        $this->assertSame(TypeArticle::VetementsFemme, $don->type_article);
+        $this->assertSame(EtatGeneral::Moyen, $don->etat_general);
         $this->assertSame(StatutVetement::Donne, $vetement->fresh()->statut);
     }
 

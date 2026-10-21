@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Dons\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dons\AssociationRequest;
 use App\Models\Association;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,8 +15,12 @@ use Illuminate\View\View;
 
 class AssociationController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Association::class);
+
         $search = trim((string) $request->query('q'));
         $active = $request->query('active');
 
@@ -35,11 +42,18 @@ class AssociationController extends Controller
 
     public function create(): View
     {
-        return view('admin.dons.associations.create', ['association' => new Association(['active' => true])]);
+        $this->authorize('create', Association::class);
+
+        return view('admin.dons.associations.create', [
+            'association' => new Association(['active' => true, 'capacite_mensuelle_kg' => 0]),
+            'responsables' => $this->responsables(),
+        ]);
     }
 
     public function store(AssociationRequest $request): RedirectResponse
     {
+        $this->authorize('create', Association::class);
+
         $data = $request->validated();
 
         if ($request->hasFile('logo')) {
@@ -54,7 +68,9 @@ class AssociationController extends Controller
 
     public function show(Association $association): View
     {
-        $association->loadCount('dons')->loadSum('dons', 'poids_kg');
+        $this->authorize('view', $association);
+
+        $association->load('responsable')->loadCount('dons')->loadSum('dons', 'poids_kg');
         $dons = $association->dons()->with('user')->latest()->paginate(10);
 
         return view('admin.dons.associations.show', compact('association', 'dons'));
@@ -62,11 +78,15 @@ class AssociationController extends Controller
 
     public function edit(Association $association): View
     {
-        return view('admin.dons.associations.edit', compact('association'));
+        $this->authorize('update', $association);
+
+        return view('admin.dons.associations.edit', ['association' => $association, 'responsables' => $this->responsables()]);
     }
 
     public function update(AssociationRequest $request, Association $association): RedirectResponse
     {
+        $this->authorize('update', $association);
+
         $data = $request->validated();
         unset($data['logo']);
 
@@ -84,13 +104,26 @@ class AssociationController extends Controller
             ->with('success', "L'association « {$association->nom} » a été mise à jour.");
     }
 
+    /**
+     * Archive (soft delete): the association leaves the site and the back office lists,
+     * its donations and logo are kept so their history stays readable.
+     */
     public function destroy(Association $association): RedirectResponse
     {
-        $this->deleteLogo($association);
+        $this->authorize('delete', $association);
+
         $association->delete();
 
         return redirect()->route('admin.dons.associations.index')
-            ->with('success', "L'association « {$association->nom} » et ses dons ont été supprimés.");
+            ->with('success', "L'association « {$association->nom} » a été archivée. Ses dons restent consultables.");
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    private function responsables(): Collection
+    {
+        return User::orderBy('name')->get(['id', 'name', 'email']);
     }
 
     private function deleteLogo(Association $association): void

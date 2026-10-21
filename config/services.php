@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    // Google Gemini (API REST), utilisé par le module Associations & dons (App\Services\Ai\GeminiClient).
+    // Sans clé, les fonctionnalités IA basculent sur leur version sans IA.
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 20),
+        'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+    ],
+
 ];

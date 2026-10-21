@@ -2,12 +2,13 @@
 
 namespace App\Http\Requests\Dons;
 
-use App\Models\Don;
+use App\Enums\Dons\DonStatut;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Back office: change only the statut of a donation.
+ * Change the statut of a donation through the workflow (back office and Espace association).
+ * Authorization is checked by DonPolicy::transition in the controller.
  */
 class UpdateDonStatutRequest extends FormRequest
 {
@@ -19,7 +20,8 @@ class UpdateDonStatutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'statut' => ['required', Rule::in(array_keys(Don::STATUTS))],
+            'statut' => ['required', Rule::enum(DonStatut::class)],
+            'commentaire' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -27,7 +29,13 @@ class UpdateDonStatutRequest extends FormRequest
     {
         return [
             'statut.required' => 'Le statut est obligatoire.',
-            'statut.in' => 'Le statut sélectionné est invalide.',
+            'statut.enum' => 'Le statut sélectionné est invalide.',
+            'commentaire.max' => 'Le commentaire ne peut pas dépasser :max caractères.',
         ];
+    }
+
+    public function statut(): DonStatut
+    {
+        return $this->enum('statut', DonStatut::class);
     }
 }

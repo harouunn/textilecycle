@@ -30,8 +30,8 @@
       <form method="POST" action="{{ route('admin.dons.associations.destroy', $association) }}" class="tcd-inline">
         @csrf
         @method('DELETE')
-        @include('admin.dons.partials.btn', ['label' => 'Supprimer', 'icon' => 'bx-trash', 'color' => 'error', 'variant' => 'tonal',
-          'confirm' => "Supprimer « {$association->nom} » et ses {$association->dons_count} don(s) ?"])
+        @include('admin.dons.partials.btn', ['label' => 'Archiver', 'icon' => 'bx-archive', 'color' => 'error', 'variant' => 'tonal',
+          'confirm' => "Archiver « {$association->nom} » ? Elle disparaîtra du site ; ses {$association->dons_count} don(s) restent consultables."])
       </form>
     </div>
   </div>
@@ -60,6 +60,24 @@
       <div class="v-card-text">
         <dl class="tcd-dl">
           <dt>Adresse</dt><dd>{{ $association->adresse }}, {{ $association->ville }}</dd>
+          <dt>Coordonnées GPS</dt>
+          <dd>
+            @if ($association->latitude !== null && $association->longitude !== null)
+              <a href="https://www.openstreetmap.org/?mlat={{ $association->latitude }}&mlon={{ $association->longitude }}#map=16/{{ $association->latitude }}/{{ $association->longitude }}" target="_blank" rel="noopener">{{ $association->latitude }}, {{ $association->longitude }}</a>
+            @else
+              <span class="text-medium-emphasis">—</span>
+            @endif
+          </dd>
+          <dt>Responsable</dt>
+          <dd>
+            @if ($association->responsable)
+              {{ $association->responsable->name }} — <a href="mailto:{{ $association->responsable->email }}">{{ $association->responsable->email }}</a>
+            @else
+              <span class="text-medium-emphasis">Aucun</span>
+            @endif
+          </dd>
+          <dt>Capacité mensuelle</dt>
+          <dd>{{ $association->capacite_mensuelle_kg ? number_format($association->capacite_mensuelle_kg, 0, ',', ' ').' kg' : 'Non renseignée' }}</dd>
           <dt>Téléphone</dt><dd>{{ $association->telephone }}</dd>
           <dt>E-mail</dt><dd><a href="mailto:{{ $association->email }}">{{ $association->email }}</a></dd>
           <dt>Site web</dt>
@@ -83,6 +101,25 @@
       <div class="v-card-text tcd-pre">{{ $association->description }}</div>
       <div class="v-card-item"><div class="v-card-item__content"><div class="v-card-title">Besoins</div></div></div>
       <div class="v-card-text tcd-pre">{{ $association->besoins }}</div>
+      <span class="v-card__underlay"></span>
+    </div>
+
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated mb-6">
+      <div class="v-card-item"><div class="v-card-item__content"><div class="v-card-title">Rapport d'impact mensuel</div></div></div>
+      <div class="v-card-text">
+        <div class="d-flex flex-wrap align-end gap-3 mb-3">
+          <div>
+            <label for="mois-rapport" class="tcd-label">Mois</label>
+            <input type="month" id="mois-rapport" value="{{ now()->format('Y-m') }}" max="{{ now()->format('Y-m') }}" class="tcd-input">
+          </div>
+          @include('admin.dons.partials.btn', ['type' => 'button', 'label' => 'Générer avec l\'IA', 'icon' => 'bx-bulb', 'variant' => 'tonal',
+            'attributs' => ['data-ia-rediger' => '', 'data-type' => 'rapport', 'data-cible' => 'rapport',
+              'data-fixes' => json_encode(['association_id' => $association->id]), 'data-champs' => json_encode(['mois' => '#mois-rapport'])]])
+        </div>
+        <textarea id="rapport" rows="6" class="tcd-input" placeholder="Le rapport, calculé à partir des dons reçus ce mois-ci, s'affiche ici pour relecture."></textarea>
+        <div data-ia-message="rapport"></div>
+        <p class="tcd-hint mb-0 mt-2">Texte à relire puis copier : il n'est pas enregistré.</p>
+      </div>
       <span class="v-card__underlay"></span>
     </div>
   </div>
@@ -128,3 +165,5 @@
   </div>
 </div>
 @endsection
+
+@include('dons.partials.ia-rediger')

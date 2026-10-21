@@ -11,6 +11,7 @@
     <div class="d-flex align-center gap-3">
       <h4 class="text-h4 mb-0">Don n°{{ $don->id }}</h4>
       @include('admin.dons.partials.statut', ['don' => $don])
+      @if ($don->estARisque()) @include('admin.dons.partials.badge-risque', ['don' => $don]) @endif
     </div>
     <div class="d-flex gap-2">
       @include('admin.dons.partials.btn', ['href' => route('admin.dons.dons.edit', $don), 'label' => 'Modifier', 'icon' => 'bx-edit'])
@@ -32,10 +33,22 @@
       <div class="v-card-text">
         <dl class="tcd-dl">
           <dt>Association</dt>
-          <dd><a href="{{ route('admin.dons.associations.show', $don->association) }}">{{ $don->association->nom }}</a> ({{ $don->association->ville }})</dd>
+          <dd>
+            @if ($don->association->trashed())
+              {{ $don->association->nom }} ({{ $don->association->ville }}) — <span class="text-medium-emphasis">archivée</span>
+            @else
+              <a href="{{ route('admin.dons.associations.show', $don->association) }}">{{ $don->association->nom }}</a> ({{ $don->association->ville }})
+            @endif
+          </dd>
           @if ($don->vetement)
             <dt>Vêtement du catalogue</dt>
             <dd><a href="{{ route('admin.depot.vetements.show', $don->vetement) }}">{{ $don->vetement->titre }}</a></dd>
+          @endif
+          @if ($don->campagne)
+            <dt>Campagne</dt><dd><a href="{{ route('admin.dons.campagnes.show', $don->campagne) }}">{{ $don->campagne->titre }}</a></dd>
+          @endif
+          @if ($don->reference)
+            <dt>Reçu</dt><dd><a href="{{ route('dons.mes-dons.recu', $don) }}">{{ $don->reference }} (PDF)</a></dd>
           @endif
           <dt>Donateur</dt>
           <dd>{{ $don->user->name }} — <a href="mailto:{{ $don->user->email }}">{{ $don->user->email }}</a></dd>
@@ -57,23 +70,80 @@
   </div>
 
   <div class="v-col-md-4 v-col-12">
-    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+    @php($transitions = collect($don->statut->allowedTransitions())->filter(fn ($statut) => auth()->user()->can('transition', [$don, $statut])))
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated mb-6">
       <div class="v-card-item"><div class="v-card-item__content"><div class="v-card-title">Changer le statut</div></div></div>
       <div class="v-card-text">
-        <form method="POST" action="{{ route('admin.dons.dons.statut', $don) }}">
-          @csrf
-          @method('PATCH')
-          <div class="tcd-field">
-            <label for="statut" class="tcd-label">Nouveau statut</label>
-            <select id="statut" name="statut" @class(['tcd-input', 'is-invalid' => $errors->has('statut')])>
-              @foreach (\App\Models\Don::STATUTS as $optValue => $optLabel)
-                <option value="{{ $optValue }}" @selected(old('statut', $don->statut) === $optValue)>{{ $optLabel }}</option>
-              @endforeach
-            </select>
-            @error('statut') <div class="tcd-error">{{ $message }}</div> @enderror
-          </div>
-          @include('admin.dons.partials.btn', ['label' => 'Mettre à jour', 'icon' => 'bx-check'])
-        </form>
+        @if ($transitions->isEmpty())
+          <p class="mb-0 text-medium-emphasis">« {{ $don->statutLabel() }} » est un statut final : ce don ne peut plus changer de statut.</p>
+        @else
+          <form method="POST" action="{{ route('admin.dons.dons.statut', $don) }}">
+            @csrf
+            @method('PATCH')
+            <div class="tcd-field">
+              <label for="statut" class="tcd-label">Nouveau statut</label>
+              <select id="statut" name="statut" @class(['tcd-input', 'is-invalid' => $errors->has('statut')])>
+                @foreach ($transitions as $statut)
+                  <option value="{{ $statut->value }}" @selected(old('statut') === $statut->value)>{{ $statut->label() }}</option>
+                @endforeach
+              </select>
+              @error('statut') <div class="tcd-error">{{ $message }}</div> @enderror
+            </div>
+            <div class="tcd-field">
+              <label for="commentaire" class="tcd-label">Commentaire</label>
+              <textarea id="commentaire" name="commentaire" rows="3" maxlength="1000" @class(['tcd-input', 'is-invalid' => $errors->has('commentaire')]) placeholder="Visible par le donateur dans l'historique.">{{ old('commentaire') }}</textarea>
+              @error('commentaire') <div class="tcd-error">{{ $message }}</div> @enderror
+            </div>
+            @include('admin.dons.partials.btn', ['label' => 'Mettre à jour', 'icon' => 'bx-check'])
+          </form>
+        @endif
+      </div>
+      <span class="v-card__underlay"></span>
+    </div>
+
+    @php($risque = data_get($don->ia_analyse, 'risque'))
+    @php($photo = data_get($don->ia_analyse, 'photo'))
+    @if ($risque || $photo)
+      <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated mb-6">
+        <div class="v-card-item"><div class="v-card-item__content"><div class="v-card-title">Analyse automatique</div></div></div>
+        <div class="v-card-text">
+          @if ($risque)
+            <div class="d-flex align-center gap-2 mb-2">
+              <strong>Risque : {{ $risque['score'] }}/100</strong>
+              @if ($don->estARisque()) @include('admin.dons.partials.badge-risque', ['don' => $don]) @endif
+            </div>
+            @if (! empty($risque['explication']))
+              <p class="mb-2">{{ $risque['explication'] }}</p>
+            @endif
+            @if (! empty($risque['raisons']))
+              <ul class="text-body-2 mb-2 ps-4">
+                @foreach ($risque['raisons'] as $raison) <li>{{ $raison }}</li> @endforeach
+              </ul>
+            @endif
+            <p class="tcd-hint">{{ ($risque['source'] ?? '') === 'ia' ? 'Explication rédigée par l\'IA à partir des règles déclenchées.' : 'Résultat des règles automatiques.' }}</p>
+          @endif
+          @if ($photo)
+            <p class="mb-1"><strong>Photo analysée par l'IA</strong> (confiance {{ round(($photo['confiance'] ?? 0) * 100) }} %)</p>
+            <p class="text-body-2 mb-0">
+              @if ($photo['est_textile'] ?? false)
+                {{ \App\Enums\Dons\TypeArticle::tryFrom($photo['type_article'] ?? '')?->label() }} ·
+                {{ \App\Enums\Dons\EtatGeneral::tryFrom($photo['etat_general'] ?? '')?->label() }} ·
+                ≈ {{ $photo['quantite_estimee'] ?? '?' }} article(s), {{ $photo['poids_estime_kg'] ?? '?' }} kg
+                @if (! empty($photo['description_courte'])) <br>« {{ $photo['description_courte'] }} » @endif
+              @else
+                Pas de textile reconnu.
+              @endif
+            </p>
+          @endif
+        </div>
+        <span class="v-card__underlay"></span>
+      </div>
+    @endif
+
+    <div class="v-card v-theme--light v-card--density-default v-card--variant-elevated">
+      <div class="v-card-item"><div class="v-card-item__content"><div class="v-card-title">Historique</div></div></div>
+      <div class="v-card-text">
+        @include('admin.dons.partials.historique', ['don' => $don])
       </div>
       <span class="v-card__underlay"></span>
     </div>

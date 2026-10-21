@@ -40,6 +40,17 @@
         @guest
           <p class="small text-muted mt-2 mb-0">Vous devrez vous <a href="{{ route('login') }}">connecter</a> pour proposer un don.</p>
         @endguest
+
+        @if ($campagnes->isNotEmpty())
+          <h4 class="text-uppercase mt-5 mb-3">Campagnes en cours</h4>
+          <div class="row g-4">
+            @foreach ($campagnes as $campagne)
+              <div class="col-md-6">
+                @include('dons.partials.campagne-carte', ['campagne' => $campagne, 'afficherAssociation' => false])
+              </div>
+            @endforeach
+          </div>
+        @endif
       </div>
 
       <div class="col-lg-4">
@@ -58,4 +69,5 @@
     </div>
   </div>
 </section>
+@include('dons.partials.assistant')
 @endsection

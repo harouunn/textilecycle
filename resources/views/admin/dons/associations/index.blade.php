@@ -91,8 +91,8 @@
                   <form method="POST" action="{{ route('admin.dons.associations.destroy', $association) }}" class="tcd-inline">
                     @csrf
                     @method('DELETE')
-                    @include('admin.dons.partials.btn', ['icon' => 'bx-trash', 'variant' => 'text', 'color' => 'error', 'size' => 'small', 'title' => 'Supprimer',
-                      'confirm' => "Supprimer « {$association->nom} » et ses {$association->dons_count} don(s) ?"])
+                    @include('admin.dons.partials.btn', ['icon' => 'bx-archive', 'variant' => 'text', 'color' => 'error', 'size' => 'small', 'title' => 'Archiver',
+                      'confirm' => "Archiver « {$association->nom} » ? Elle disparaîtra du site ; ses {$association->dons_count} don(s) restent consultables."])
                   </form>
                 </div>
               </td>

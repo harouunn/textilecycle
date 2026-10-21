@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  *  - le site ne peut pas être affiché dans une iframe d'un autre site (anti-clickjacking) ;
  *  - le navigateur ne devine pas le type des fichiers (anti-MIME sniffing) ;
  *  - l'adresse complète n'est pas transmise aux sites externes ;
- *  - caméra, micro et géolocalisation sont désactivés ;
+ *  - caméra et micro sont désactivés, la géolocalisation est réservée aux pages du site ;
  *  - en HTTPS, le navigateur retient de toujours utiliser HTTPS (HSTS).
  */
 class EnTetesSecurite
@@ -23,7 +23,9 @@ class EnTetesSecurite
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        // Géolocalisation autorisée pour le site lui-même seulement (filtre « près de moi » du module Dons ;
+        // le navigateur demande toujours l'accord du visiteur). Interdite aux iframes d'autres sites.
+        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
 
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

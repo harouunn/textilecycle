@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Association;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -36,6 +37,7 @@ class AssociationFactory extends Factory
             'site_web' => fake()->optional(0.6)->url(),
             'logo' => null,
             'besoins' => implode("\n", fake()->randomElements($besoins, 2)),
+            'capacite_mensuelle_kg' => fake()->randomElement([0, 100, 250, 500, 1000]),
             'active' => true,
         ];
     }
@@ -43,5 +45,10 @@ class AssociationFactory extends Factory
     public function inactive(): static
     {
         return $this->state(fn () => ['active' => false]);
+    }
+
+    public function gereePar(User $responsable): static
+    {
+        return $this->state(fn () => ['responsable_id' => $responsable->id]);
     }
 }
