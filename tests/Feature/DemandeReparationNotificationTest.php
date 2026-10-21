@@ -3,22 +3,37 @@
 namespace Tests\Feature;
 
 use App\Enums\Ateliers\StatutDemande;
+use App\Enums\Ateliers\TypeReparation;
 use App\Enums\Ateliers\TypeVetement;
 use App\Enums\Role;
+use App\Jobs\AnalyserDemandeJob;
 use App\Models\Atelier;
 use App\Models\DemandeReparation;
 use App\Models\User;
 use App\Notifications\NouvelleDemandeReparation;
 use App\Notifications\StatutDemandeReparationChange;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class DemandeReparationNotificationTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Les tests déclenchent eux-mêmes la fin d'analyse (analyse_statut). En test, la file d'attente est
+     * synchrone : sans simulation, le job lancé à la création analyserait aussitôt la demande (et
+     * appellerait les vraies IA), d'où une notification de trop.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Queue::fake();
+    }
 
     /**
      * Test qu'une seule notification admin est envoyée par demande, même après relance de l'analyse.
@@ -81,7 +96,7 @@ class DemandeReparationNotificationTest extends TestCase
         $demande->update(['analyse_statut' => 'ok']);
 
         Notification::assertSentTo($admin, NouvelleDemandeReparation::class, function ($notification) use ($demande) {
-            return $notification->demande->id === $demande->id && !$notification->analyseErreur;
+            return $notification->demande->id === $demande->id && ! $notification->analyseErreur;
         });
     }
 
@@ -101,9 +116,9 @@ class DemandeReparationNotificationTest extends TestCase
             'user_id' => $user->id,
             'atelier_id' => $atelier->id,
             'titre' => 'Test demande',
-            'type_vetement' => \App\Enums\Ateliers\TypeVetement::Haut,
+            'type_vetement' => TypeVetement::Haut,
             'description' => 'Description test',
-            'reparations' => [\App\Enums\Ateliers\TypeReparation::AExpertiser],
+            'reparations' => [TypeReparation::AExpertiser],
             'cout_estime' => 0,
             'delai_estime_jours' => 0,
             'diagnostic' => 'Test',
@@ -146,7 +161,7 @@ class DemandeReparationNotificationTest extends TestCase
         $demande->update(['statut' => StatutDemande::Acceptee]);
 
         Notification::assertSentTo($user, StatutDemandeReparationChange::class, function ($notification) use ($demande) {
-            return $notification->demande->id === $demande->id 
+            return $notification->demande->id === $demande->id
                 && $notification->nouveauStatut === StatutDemande::Acceptee;
         });
     }
@@ -172,7 +187,7 @@ class DemandeReparationNotificationTest extends TestCase
         $demande->update(['statut' => StatutDemande::Refusee]);
 
         Notification::assertSentTo($user, StatutDemandeReparationChange::class, function ($notification) use ($demande) {
-            return $notification->demande->id === $demande->id 
+            return $notification->demande->id === $demande->id
                 && $notification->nouveauStatut === StatutDemande::Refusee;
         });
     }
@@ -198,7 +213,7 @@ class DemandeReparationNotificationTest extends TestCase
         $demande->update(['statut' => StatutDemande::Terminee]);
 
         Notification::assertSentTo($user, StatutDemandeReparationChange::class, function ($notification) use ($demande) {
-            return $notification->demande->id === $demande->id 
+            return $notification->demande->id === $demande->id
                 && $notification->nouveauStatut === StatutDemande::Terminee;
         });
     }
@@ -266,7 +281,7 @@ class DemandeReparationNotificationTest extends TestCase
 
         // Rafraîchir pour obtenir les notifications
         $user1->refresh();
-        
+
         // Prendre la notification de user1
         $notification = $user1->unreadNotifications->first();
         $this->assertNotNull($notification, 'User1 devrait avoir au moins une notification');
@@ -303,7 +318,7 @@ class DemandeReparationNotificationTest extends TestCase
 
         // Rafraîchir l'utilisateur pour obtenir les notifications
         $user->refresh();
-        
+
         // Vérifier qu'il y a 5 notifications non lues
         $this->assertEquals(5, $user->unreadNotifications->count());
 
@@ -384,15 +399,15 @@ class DemandeReparationNotificationTest extends TestCase
     public function test_photos_enregistrees_avant_job_execution(): void
     {
         Storage::fake('public');
-        
+
         $admin = User::factory()->create(['role' => Role::Admin]);
         $user = User::factory()->create(['role' => Role::Client]);
         $atelier = Atelier::factory()->create(['actif' => true]);
 
         // Créer une image de test
         $fakeJpeg = str_repeat("\xFF\xD8\xFF\xE0", 20); // Simule un JPEG
-        
-        $uploadedFile = \Illuminate\Http\UploadedFile::fake()->createWithContent('test.jpg', $fakeJpeg);
+
+        $uploadedFile = UploadedFile::fake()->createWithContent('test.jpg', $fakeJpeg);
 
         // Mocker Http pour l'analyse
         Http::fake([
@@ -425,6 +440,11 @@ class DemandeReparationNotificationTest extends TestCase
 
         // Vérifier que la photo existe dans le storage
         Storage::disk('public')->assertExists($demande->photo);
+
+        // Le job d'analyse a été mis en file ; on l'exécute comme le ferait le worker.
+        Queue::assertPushed(AnalyserDemandeJob::class);
+        app()->call([new AnalyserDemandeJob($demande), 'handle']);
+        $demande->refresh();
 
         // Vérifier que l'analyse a été effectuée (preuve que le job a pu accéder à la photo)
         $this->assertNotNull($demande->analysed_at);

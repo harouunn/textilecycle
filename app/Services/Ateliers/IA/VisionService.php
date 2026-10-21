@@ -12,25 +12,27 @@ class VisionService implements AnalyseurInterface
     {
         $apiKey = config('ia.gemini.api_key');
         $model = config('ia.gemini.model');
-        
-        if (!$apiKey) {
+
+        if (! $apiKey) {
             Log::warning('Gemini API key non configurée');
+
             return null;
         }
 
         $imagePath = Storage::disk('public')->path($photoPath);
-        if (!file_exists($imagePath)) {
+        if (! file_exists($imagePath)) {
             Log::error("Photo introuvable: {$photoPath}");
+
             return null;
         }
 
         $imageData = $this->redimensionnerImage($imagePath);
-        if (!$imageData) {
+        if (! $imageData) {
             return null;
         }
 
         try {
-            $response = Http::withoutVerifying()->timeout(config('ia.gemini.timeout'))
+            $response = Http::timeout(config('ia.gemini.timeout'))
                 ->retry(1, 100)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
                     'contents' => [[
@@ -64,18 +66,19 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
                     ],
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Gemini API erreur', ['status' => $response->status()]);
+
                 return null;
             }
 
             $result = $response->json();
             $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
-            
+
             // Log pour debug
             Log::info('Gemini réponse brute', ['text' => $text]);
-            
-            if (!$text) {
+
+            if (! $text) {
                 return null;
             }
 
@@ -88,15 +91,16 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
             }
 
             $data = json_decode($text, true);
-            
+
             // Si l'IA détecte que ce n'est pas un vêtement, on retourne le message
             if (isset($data['erreur']) && $data['erreur'] === 'pas_vetement') {
                 return ['erreur' => 'pas_vetement', 'message' => $data['message'] ?? 'L\'image ne contient pas de vêtement à réparer'];
             }
-            
+
             return $this->valider($data);
         } catch (\Exception $e) {
             Log::error('VisionService exception', ['message' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -110,7 +114,7 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
 
         try {
             $info = getimagesize($path);
-            if (!$info) {
+            if (! $info) {
                 return null;
             }
 
@@ -123,7 +127,7 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
                 default => null,
             };
 
-            if (!$image) {
+            if (! $image) {
                 return null;
             }
 
@@ -136,12 +140,13 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
                 imagejpeg($image, null, config('ia.image.quality'));
                 $data = ob_get_clean();
                 imagedestroy($image);
+
                 return base64_encode($data);
             }
 
             $ratio = min($maxSize / $width, $maxSize / $height);
-            $newWidth = (int)($width * $ratio);
-            $newHeight = (int)($height * $ratio);
+            $newWidth = (int) ($width * $ratio);
+            $newHeight = (int) ($height * $ratio);
 
             $resized = imagecreatetruecolor($newWidth, $newHeight);
             imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
@@ -156,13 +161,14 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
             return base64_encode($data);
         } catch (\Exception $e) {
             Log::error('Redimensionnement image erreur', ['message' => $e->getMessage()]);
+
             return null;
         }
     }
 
     private function valider(?array $data): ?array
     {
-        if (!$data || !is_array($data)) {
+        if (! $data || ! is_array($data)) {
             return ['type_dommage' => 'autre', 'gravite' => 'moderee', 'temps_estime_min' => 30];
         }
 
@@ -177,7 +183,7 @@ Réponds en JSON: {"type_dommage":"trou|decoupe|bouton|fermeture|autre","gravite
         return [
             'type_dommage' => in_array($data['type_dommage'] ?? '', $typesDommage) ? $data['type_dommage'] : 'autre',
             'gravite' => in_array($data['gravite'] ?? '', $gravites) ? $data['gravite'] : 'moderee',
-            'temps_estime_min' => is_numeric($data['temps_estime_min'] ?? null) ? max(5, min(300, (int)$data['temps_estime_min'])) : 30,
+            'temps_estime_min' => is_numeric($data['temps_estime_min'] ?? null) ? max(5, min(300, (int) $data['temps_estime_min'])) : 30,
         ];
     }
 }
