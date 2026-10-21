@@ -41,6 +41,10 @@ x-environnement: &environnement
   DEPOT_IA_ACTIVE: ${DEPOT_IA_ACTIVE:-true}
   DEPOT_OLLAMA_URL: http://host.docker.internal:11434
   DEPOT_OLLAMA_MODELE: ${DEPOT_OLLAMA_MODELE:-gemma3:4b}
+  # IA du module Associations & dons : Google Gemini (sans clé, chaque fonctionnalité a sa version sans IA).
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+  GEMINI_TIMEOUT: ${GEMINI_TIMEOUT:-45}
 
 x-application: &application
   image: ${TEXTILECYCLE_IMAGE:-ghcr.io/harouunn/textilecycle:latest}

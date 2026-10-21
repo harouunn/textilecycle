@@ -43,6 +43,9 @@ class GeminiClient implements AiClient
             return $cache;
         }
 
+        // PHP coupe une page après 30 s par défaut : une analyse de photo peut en prendre davantage (tentatives comprises).
+        set_time_limit((1 + self::NOUVELLES_TENTATIVES) * (int) config('services.gemini.timeout', 20) + 30);
+
         $debut = microtime(true);
         try {
             $reponse = Http::baseUrl((string) config('services.gemini.base_url'))
